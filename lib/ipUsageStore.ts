@@ -1,5 +1,4 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { readMutableJsonStore, resolveDataFile, writeMutableJsonStore } from "@/lib/mutableJsonStore";
 
 export type IpStoryUsageRecord = {
   ip: string;
@@ -10,8 +9,8 @@ export type IpStoryUsageRecord = {
 
 type IpUsageStore = Record<string, IpStoryUsageRecord>;
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const STORE_PATH = path.join(DATA_DIR, "ip-story-usage.json");
+const STORE_KEY = "ip-story-usage";
+const STORE_PATH = resolveDataFile("ip-story-usage.json");
 
 function createDefaultUsage(ip: string): IpStoryUsageRecord {
   const now = new Date().toISOString();
@@ -54,30 +53,20 @@ function normalizeUsageRecord(record: IpStoryUsageRecord | undefined, ip: string
   return base;
 }
 
-async function ensureStoreFile() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-
-  try {
-    await fs.access(STORE_PATH);
-  } catch {
-    await fs.writeFile(STORE_PATH, JSON.stringify({}, null, 2), "utf8");
-  }
-}
-
 async function readStore(): Promise<IpUsageStore> {
-  await ensureStoreFile();
-  const raw = await fs.readFile(STORE_PATH, "utf8");
-
-  try {
-    return JSON.parse(raw) as IpUsageStore;
-  } catch {
-    return {};
-  }
+  return readMutableJsonStore<IpUsageStore>({
+    key: STORE_KEY,
+    filePath: STORE_PATH,
+    defaultValue: {}
+  });
 }
 
 async function writeStore(store: IpUsageStore) {
-  await ensureStoreFile();
-  await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
+  await writeMutableJsonStore({
+    key: STORE_KEY,
+    filePath: STORE_PATH,
+    value: store
+  });
 }
 
 export async function getIpStoryUsage(ip: string): Promise<IpStoryUsageRecord> {

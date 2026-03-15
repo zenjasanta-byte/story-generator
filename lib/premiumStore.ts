@@ -1,5 +1,4 @@
-﻿import { promises as fs } from "fs";
-import path from "path";
+import { readMutableJsonStore, resolveDataFile, writeMutableJsonStore } from "@/lib/mutableJsonStore";
 
 export type PremiumPlan = "free" | "premium";
 export type SubscriptionStatus =
@@ -30,8 +29,8 @@ export type UserBillingRecord = {
 
 type BillingStore = Record<string, UserBillingRecord>;
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const STORE_PATH = path.join(DATA_DIR, "premium-users.json");
+const STORE_KEY = "premium-users";
+const STORE_PATH = resolveDataFile("premium-users.json");
 
 function createDefaultRecord(userId: string): UserBillingRecord {
   return {
@@ -49,30 +48,20 @@ function createDefaultRecord(userId: string): UserBillingRecord {
   };
 }
 
-async function ensureStoreFile() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-
-  try {
-    await fs.access(STORE_PATH);
-  } catch {
-    await fs.writeFile(STORE_PATH, JSON.stringify({}, null, 2), "utf8");
-  }
-}
-
 async function readStore(): Promise<BillingStore> {
-  await ensureStoreFile();
-  const raw = await fs.readFile(STORE_PATH, "utf8");
-
-  try {
-    return JSON.parse(raw) as BillingStore;
-  } catch {
-    return {};
-  }
+  return readMutableJsonStore<BillingStore>({
+    key: STORE_KEY,
+    filePath: STORE_PATH,
+    defaultValue: {}
+  });
 }
 
 async function writeStore(store: BillingStore) {
-  await ensureStoreFile();
-  await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
+  await writeMutableJsonStore({
+    key: STORE_KEY,
+    filePath: STORE_PATH,
+    value: store
+  });
 }
 
 function normalizeRecord(record: UserBillingRecord): UserBillingRecord {

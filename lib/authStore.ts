@@ -1,7 +1,6 @@
 import { randomBytes, randomUUID, scrypt as nodeScrypt, timingSafeEqual } from "crypto";
-import { promises as fs } from "fs";
-import path from "path";
 import { promisify } from "util";
+import { readMutableJsonStore, resolveDataFile, writeMutableJsonStore } from "@/lib/mutableJsonStore";
 
 const scrypt = promisify(nodeScrypt);
 
@@ -19,41 +18,32 @@ type AuthStore = {
   userIdsByEmail: Record<string, string>;
 };
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const STORE_PATH = path.join(DATA_DIR, "auth-users.json");
+const STORE_KEY = "auth-users";
+const STORE_PATH = resolveDataFile("auth-users.json");
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-async function ensureStoreFile() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-
-  try {
-    await fs.access(STORE_PATH);
-  } catch {
-    await fs.writeFile(STORE_PATH, JSON.stringify({ usersById: {}, userIdsByEmail: {} }, null, 2), "utf8");
-  }
-}
-
 async function readStore(): Promise<AuthStore> {
-  await ensureStoreFile();
-  const raw = await fs.readFile(STORE_PATH, "utf8");
+  const parsed = await readMutableJsonStore<Partial<AuthStore>>({
+    key: STORE_KEY,
+    filePath: STORE_PATH,
+    defaultValue: { usersById: {}, userIdsByEmail: {} }
+  });
 
-  try {
-    const parsed = JSON.parse(raw) as Partial<AuthStore>;
-    return {
-      usersById: parsed.usersById ?? {},
-      userIdsByEmail: parsed.userIdsByEmail ?? {}
-    };
-  } catch {
-    return { usersById: {}, userIdsByEmail: {} };
-  }
+  return {
+    usersById: parsed.usersById ?? {},
+    userIdsByEmail: parsed.userIdsByEmail ?? {}
+  };
 }
 
 async function writeStore(store: AuthStore) {
-  await ensureStoreFile();
-  await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
+  await writeMutableJsonStore({
+    key: STORE_KEY,
+    filePath: STORE_PATH,
+    value: store
+  });
 }
 
 async function hashPassword(password: string, salt: string) {
