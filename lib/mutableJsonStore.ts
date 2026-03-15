@@ -7,9 +7,17 @@ type RedisConfig = {
 };
 
 function getRedisConfig(): RedisConfig | null {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.VERCEL_KV_REST_API_URL || null;
+  const url =
+    process.env.KV_REST_API_URL ||
+    process.env.UPSTASH_REDIS_REST_URL ||
+    process.env.VERCEL_KV_REST_API_URL ||
+    null;
+
   const token =
-    process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || process.env.VERCEL_KV_REST_API_TOKEN || null;
+    process.env.KV_REST_API_TOKEN ||
+    process.env.UPSTASH_REDIS_REST_TOKEN ||
+    process.env.VERCEL_KV_REST_API_TOKEN ||
+    null;
 
   if (!url || !token) {
     return null;
@@ -32,20 +40,33 @@ async function redisGet(key: string): Promise<string | null> {
     throw new Error("Redis is not configured");
   }
 
-  const response = await fetch(`${config.url}/get/${encodeURIComponent(getRedisKey(key))}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${config.token}`
-    },
-    cache: "no-store"
-  });
+  const response = await fetch(
+    `${config.url}/get/${encodeURIComponent(getRedisKey(key))}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${config.token}`,
+      },
+      cache: "no-store",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`Redis GET failed with status ${response.status}`);
   }
 
-  const payload = (await response.json()) as { result?: string | null };
-  return payload.result ?? null;
+  const payload = (await response.json()) as { result?: unknown };
+  const result = payload.result;
+
+  if (result == null) {
+    return null;
+  }
+
+  if (typeof result === "string") {
+    return result;
+  }
+
+  return JSON.stringify(result);
 }
 
 async function redisSet(key: string, value: string) {
@@ -54,18 +75,39 @@ async function redisSet(key: string, value: string) {
     throw new Error("Redis is not configured");
   }
 
-  const response = await fetch(`${config.url}/set/${encodeURIComponent(getRedisKey(key))}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(value),
-    cache: "no-store"
-  });
+  const response = await fetch(
+    `${config.url}/set/${encodeURIComponent(getRedisKey(key))}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.token}`,
+        "Content-Type": "text/plain",
+      },
+      body: value,
+      cache: "no-store",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`Redis SET failed with status ${response.status}`);
+  }
+}
+
+function parsePossiblyDoubleEncodedJson<T>(raw: string, defaultValue: T): T {
+  try {
+    let parsed: unknown = JSON.parse(raw);
+
+    if (typeof parsed === "string") {
+      try {
+        parsed = JSON.parse(parsed);
+      } catch {
+        return defaultValue;
+      }
+    }
+
+    return parsed as T;
+  } catch {
+    return defaultValue;
   }
 }
 
@@ -81,7 +123,9 @@ export async function readMutableJsonStore<T>(params: {
   if (useRedisStore()) {
     const config = getRedisConfig();
     if (!config) {
-      throw new Error("Production mutable storage is not configured. Set KV/Upstash Redis REST env vars.");
+      throw new Error(
+        "Production mutable storage is not configured. Set KV/Upstash Redis REST env vars."
+      );
     }
 
     try {
@@ -90,11 +134,11 @@ export async function readMutableJsonStore<T>(params: {
         return params.defaultValue;
       }
 
-      return JSON.parse(raw) as T;
+      return parsePossiblyDoubleEncodedJson<T>(raw, params.defaultValue);
     } catch (error) {
       console.error("[mutable-json-store] redis read failed", {
         key: params.key,
-        error
+        error,
       });
       throw error;
     }
@@ -105,7 +149,11 @@ export async function readMutableJsonStore<T>(params: {
   try {
     await fs.access(params.filePath);
   } catch {
-    await fs.writeFile(params.filePath, JSON.stringify(params.defaultValue, null, 2), "utf8");
+    await fs.writeFile(
+      params.filePath,
+      JSON.stringify(params.defaultValue, null, 2),
+      "utf8"
+    );
     return params.defaultValue;
   }
 
@@ -127,7 +175,9 @@ export async function writeMutableJsonStore<T>(params: {
   if (useRedisStore()) {
     const config = getRedisConfig();
     if (!config) {
-      throw new Error("Production mutable storage is not configured. Set KV/Upstash Redis REST env vars.");
+      throw new Error(
+        "Production mutable storage is not configured. Set KV/Upstash Redis REST env vars."
+      );
     }
 
     try {
@@ -136,7 +186,7 @@ export async function writeMutableJsonStore<T>(params: {
     } catch (error) {
       console.error("[mutable-json-store] redis write failed", {
         key: params.key,
-        error
+        error,
       });
       throw error;
     }
