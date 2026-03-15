@@ -1,0 +1,28 @@
+{
+  "4a7ab79a-3352-4b48-84aa-c4d6816184e1": {
+    "userId": "4a7ab79a-3352-4b48-84aa-c4d6816184e1",
+    "plan": "premium",
+    "subscriptionStatus": "active",
+    "stripeCustomerId": "cus_U95aHRVThIX8Ig",
+    "stripeSubscriptionId": "sub_1TAnP8KQzbDcIIQQEcH3VAY0",
+    "stripeCheckoutSessionId": "cs_test_b1OJEpihnTx3FlRqK0aULJP0GuHLCtDV4SpcgKqSYe1VvCZhkV4y9HUNpF",
+    "updatedAt": "2026-03-15T09:59:50.548Z",
+    "stripePriceId": "price_1T9Uv9KQzbDcIIQQ9wqtxJ62",
+    "billingInterval": "year",
+    "cancelAtPeriodEnd": false,
+    "currentPeriodEnd": "2027-03-14T08:18:34.000Z"
+  },
+  "77e6fb58-8b3e-4490-8845-d1073b4e5069": {
+    "userId": "77e6fb58-8b3e-4490-8845-d1073b4e5069",
+    "plan": "free",
+    "subscriptionStatus": "inactive",
+    "stripeCustomerId": "cus_U9UFBXDhCO9CY8",
+    "stripeSubscriptionId": null,
+    "stripeCheckoutSessionId": null,
+    "stripePriceId": null,
+    "billingInterval": null,
+    "cancelAtPeriodEnd": false,
+    "currentPeriodEnd": null,
+    "updatedAt": "2026-03-15T15:14:29.098Z"
+  }
+}

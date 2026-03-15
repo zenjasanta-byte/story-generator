@@ -1,0 +1,69 @@
+{
+  "usersById": {
+    "77e6fb58-8b3e-4490-8845-d1073b4e5069": {
+      "id": "77e6fb58-8b3e-4490-8845-d1073b4e5069",
+      "email": "zenjasanta@gmail.com",
+      "passwordHash": "d6fb7a9f3ccc59387dd4018d1220e931da48b97d5e58ebd89b0dcde81f73dbadf55c62d8f4f1fa89642093398683455e168f4d64a7f4bdb78743a7325feabb48",
+      "passwordSalt": "44ef6e3f6cb4812cb5779d4e87f27867",
+      "createdAt": "2026-03-15T08:29:46.985Z",
+      "updatedAt": "2026-03-15T08:29:46.985Z"
+    },
+    "ab787143-eb20-4c95-9dc5-76008562ab75": {
+      "id": "ab787143-eb20-4c95-9dc5-76008562ab75",
+      "email": "zenjasantanovikovi@gmail.com",
+      "passwordHash": "b4e0d852ec2101557f269d6e1019dac1c5511ae34cdbf28b435b1ec73acac23ff1567449649b182c6206601e6fe5e5543b429f6ed5d714eff7201950f09b36c7",
+      "passwordSalt": "1eed67a81d64acaad33a0714cc77cc4f",
+      "createdAt": "2026-03-15T12:48:32.704Z",
+      "updatedAt": "2026-03-15T12:48:32.704Z"
+    },
+    "c038f831-1e62-40d5-8331-e8d1f14fc48f": {
+      "id": "c038f831-1e62-40d5-8331-e8d1f14fc48f",
+      "email": "zenjok18@inbox.lv",
+      "passwordHash": "739cd5589c5c3a7d2f3554722f8bd1d8123f50c46fd98c232e84aac140ecc16637777430258ca2eac63cb3eaa4f5b214201f485cb48c9df27d76e001efd7b0f7",
+      "passwordSalt": "6457cfda5f273dcbc4fad816707ff671",
+      "createdAt": "2026-03-15T12:49:01.463Z",
+      "updatedAt": "2026-03-15T12:49:01.463Z"
+    },
+    "772e76d2-01cf-41cc-92e0-b87b577ae775": {
+      "id": "772e76d2-01cf-41cc-92e0-b87b577ae775",
+      "email": "jtpukoluct@gmail.com",
+      "passwordHash": "20b9882c82b946cfa88a28fcefcae3e7df46038b16e711d60d0ed39a3f3351bd5112ba3f19af5a9443603307a8f582f7895371e66b0af46e81ad2963c8b2bad5",
+      "passwordSalt": "d27fb84b2f09b21f5392b44e74616b2e",
+      "createdAt": "2026-03-15T12:49:57.621Z",
+      "updatedAt": "2026-03-15T12:49:57.621Z"
+    },
+    "820333a6-e8bc-4189-8c43-cf19862a7cf9": {
+      "id": "820333a6-e8bc-4189-8c43-cf19862a7cf9",
+      "email": "santusja20@gmail.com",
+      "passwordHash": "b4c267613d58b7140ac955030abc0f5f2d5159cac9b5f8ba0ce4cb111aa27e52d8c73d65885c01cc90510bdca35b462bde6f2a99dfc81276d0f17fd480d59609",
+      "passwordSalt": "203ba02d95533d901c84a10454d9628a",
+      "createdAt": "2026-03-15T12:50:41.326Z",
+      "updatedAt": "2026-03-15T12:50:41.326Z"
+    },
+    "c2c81830-8215-480f-9d6d-5676dc84c135": {
+      "id": "c2c81830-8215-480f-9d6d-5676dc84c135",
+      "email": "jevgenijs709@gmail.com",
+      "passwordHash": "71f9829ab00849241de9bdc497a01edc3e75f190a07c424bc15cf647661ba113cfc0ad4ddfbab74ee3cd5f4c8d896bafa23c46fec8742f993502257b60698c16",
+      "passwordSalt": "590276dd53ff822cc16643af951104bb",
+      "createdAt": "2026-03-15T12:55:20.117Z",
+      "updatedAt": "2026-03-15T12:55:20.117Z"
+    },
+    "d86b7aa3-a371-45a4-b1b9-9db9457dd5be": {
+      "id": "d86b7aa3-a371-45a4-b1b9-9db9457dd5be",
+      "email": "naturesecretlv@gmail.com",
+      "passwordHash": "1870330ea29854ea55d62a175d4012f0ea16173c47b95c5a70c23fa6894f73dc918cd1cf6aacc8efcb4e95b933f0527ea4da532cf58395aca46ea2aba7accc40",
+      "passwordSalt": "189f73f8309217bfb095cfb20cc51815",
+      "createdAt": "2026-03-15T12:56:16.242Z",
+      "updatedAt": "2026-03-15T12:56:16.242Z"
+    }
+  },
+  "userIdsByEmail": {
+    "zenjasanta@gmail.com": "77e6fb58-8b3e-4490-8845-d1073b4e5069",
+    "zenjasantanovikovi@gmail.com": "ab787143-eb20-4c95-9dc5-76008562ab75",
+    "zenjok18@inbox.lv": "c038f831-1e62-40d5-8331-e8d1f14fc48f",
+    "jtpukoluct@gmail.com": "772e76d2-01cf-41cc-92e0-b87b577ae775",
+    "santusja20@gmail.com": "820333a6-e8bc-4189-8c43-cf19862a7cf9",
+    "jevgenijs709@gmail.com": "c2c81830-8215-480f-9d6d-5676dc84c135",
+    "naturesecretlv@gmail.com": "d86b7aa3-a371-45a4-b1b9-9db9457dd5be"
+  }
+}

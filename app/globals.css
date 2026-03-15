@@ -1,0 +1,128 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-night: #f6f0ff;
+  --bg-dawn: #fff4e6;
+  --bg-sky: #e8f6ff;
+  --ink: #2f243f;
+  --parchment: #fffaf1;
+  --parchment-2: #fff6ea;
+  --gold: #f7b955;
+  --rose: #ff9db2;
+  --lavender: #bda6ff;
+  --mint: #a9e7db;
+}
+
+body {
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 10% 15%, rgba(255, 188, 145, 0.45), transparent 30%),
+    radial-gradient(circle at 88% 10%, rgba(173, 155, 255, 0.35), transparent 32%),
+    radial-gradient(circle at 82% 82%, rgba(137, 219, 255, 0.3), transparent 35%),
+    linear-gradient(140deg, var(--bg-night), var(--bg-dawn) 52%, var(--bg-sky));
+  min-height: 100vh;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-14px) translateX(6px) scale(1.04);
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.25);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease-out;
+}
+
+.glass-card {
+  background: linear-gradient(155deg, rgba(255, 250, 241, 0.92), rgba(255, 244, 230, 0.88));
+  border: 1px solid rgba(255, 217, 168, 0.55);
+  border-radius: 24px;
+  box-shadow:
+    0 18px 45px rgba(122, 87, 165, 0.13),
+    0 2px 0 rgba(255, 255, 255, 0.85) inset;
+  backdrop-filter: blur(7px);
+}
+
+.hero-orb {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 999px;
+  filter: blur(46px);
+  opacity: 0.42;
+  background: #ffb981;
+  animation: drift 9s ease-in-out infinite;
+}
+
+.hero-orb-alt {
+  background: #a8bbff;
+  animation-delay: 0.9s;
+}
+
+.fairy-sparkle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.95);
+  animation: sparkle 2.4s ease-in-out infinite;
+}
+
+.storybook-button {
+  border-radius: 16px;
+  font-weight: 700;
+  transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.22s ease;
+}
+
+.storybook-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.storybook-button-primary {
+  background: linear-gradient(135deg, #ff9f7f, #ff7f9d 55%, #c38bff);
+  color: white;
+  box-shadow: 0 10px 24px rgba(184, 90, 165, 0.35);
+}
+
+.storybook-button-secondary {
+  background: linear-gradient(135deg, #89b9ff, #77a0ff 60%, #8f85ff);
+  color: white;
+  box-shadow: 0 10px 24px rgba(102, 114, 221, 0.3);
+}
+
+.storybook-button-soft {
+  background: linear-gradient(135deg, #fff4da, #ffe8c8);
+  color: #6a4c2a;
+  border: 1px solid rgba(255, 196, 121, 0.55);
+}
