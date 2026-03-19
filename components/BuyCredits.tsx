@@ -1,30 +1,22 @@
 "use client";
 
 export default function BuyCredits() {
+  const buyCredits = (amount: number, price: number) => {
+    console.log("BUY", amount, price);
+  };
+
   return (
-    <div>
-      <button
-        onClick={() => {
-          console.log("BUY 40 1000");
-        }}
-      >
-        ?10 - 40 credits
+    <div style={{ display: "flex", gap: "10px" }}>
+      <button onClick={() => buyCredits(40, 1000)}>
+        {"\u20AC10 - 40 credits"}
       </button>
 
-      <button
-        onClick={() => {
-          console.log("BUY 100 2000");
-        }}
-      >
-        ?20 - 100 credits
+      <button onClick={() => buyCredits(100, 2000)}>
+        {"\u20AC20 - 100 credits"}
       </button>
 
-      <button
-        onClick={() => {
-          console.log("BUY 180 3000");
-        }}
-      >
-        ?30 - 180 credits
+      <button onClick={() => buyCredits(180, 3000)}>
+        {"\u20AC30 - 180 credits"}
       </button>
     </div>
   );
