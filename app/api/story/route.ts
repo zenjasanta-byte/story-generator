@@ -123,9 +123,6 @@ const isPremium = identity.authenticatedAppUserId === "9pk5r-1773912436064-858a3
       return NextResponse.json({ error: "Missing user identifier." }, { status: 400 });
     }
 
- 
-      billing && billing.plan === "premium" && shouldKeepPremiumForStatus(billing.subscriptionStatus)
-    );
 
     let usage = await getUserStoryUsage(userId);
     let ipUsage = clientIp !== "unknown" ? await getIpStoryUsage(clientIp) : null;
@@ -150,7 +147,7 @@ const isPremium = identity.authenticatedAppUserId === "9pk5r-1773912436064-858a3
       console.warn("[api/story] free limit reached", {
         userId,
         feature: "story_generation",
-        plan: billing?.plan ?? "free",
+      plan: isPremium ? "premium" : "free",
         storiesGenerated: usage.storiesGenerated
       });
 
