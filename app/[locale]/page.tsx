@@ -186,6 +186,11 @@ export default function HomePage() {
     }
   }
 
+  async function buyCredits(amount: number) {
+    void amount;
+    alert("Payment system will be connected here");
+  }
+
   async function handleCopy() {
     if (!copyText) return;
     try {
@@ -331,6 +336,111 @@ export default function HomePage() {
             <p style={{ opacity: 0.7 }}>
               1 story = 5 credits
             </p>
+          </div>
+
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "18px",
+              borderRadius: "16px",
+              background: "#fff",
+              boxShadow: "0 12px 30px rgba(120, 84, 164, 0.12)"
+            }}
+          >
+            <h3
+              style={{
+                margin: 0,
+                marginBottom: "14px",
+                fontSize: "20px",
+                fontWeight: "bold",
+                color: "#3b2551"
+              }}
+            >
+              Buy Credits
+            </h3>
+
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px"
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => void buyCredits(40)}
+                style={{
+                  border: "none",
+                  borderRadius: "999px",
+                  padding: "12px 18px",
+                  background: "linear-gradient(135deg, #1f1f1f, #333)",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease, opacity 0.2s ease"
+                }}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.transform = "translateY(-1px)";
+                  event.currentTarget.style.opacity = "0.92";
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.transform = "translateY(0)";
+                  event.currentTarget.style.opacity = "1";
+                }}
+              >
+                €10 - 40 credits
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void buyCredits(100)}
+                style={{
+                  border: "none",
+                  borderRadius: "999px",
+                  padding: "12px 18px",
+                  background: "linear-gradient(135deg, #6f54ff, #8d74ff)",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease, opacity 0.2s ease"
+                }}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.transform = "translateY(-1px)";
+                  event.currentTarget.style.opacity = "0.92";
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.transform = "translateY(0)";
+                  event.currentTarget.style.opacity = "1";
+                }}
+              >
+                €20 - 100 credits
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void buyCredits(180)}
+                style={{
+                  border: "none",
+                  borderRadius: "999px",
+                  padding: "12px 18px",
+                  background: "linear-gradient(135deg, #e27d47, #f6a96c)",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease, opacity 0.2s ease"
+                }}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.transform = "translateY(-1px)";
+                  event.currentTarget.style.opacity = "0.92";
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.transform = "translateY(0)";
+                  event.currentTarget.style.opacity = "1";
+                }}
+              >
+                €30 - 180 credits
+              </button>
+            </div>
           </div>
         </div>
 

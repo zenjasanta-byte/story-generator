@@ -45,7 +45,7 @@ function normalizeUsageRecord(record: UserStoryUsageRecord | undefined, userId: 
         dailyStoriesGenerated: typeof record.dailyStoriesGenerated === "number" ? record.dailyStoriesGenerated : 0,
         dailyWindowStartedAt: typeof record.dailyWindowStartedAt === "string" ? record.dailyWindowStartedAt : record.updatedAt,
         updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : fallback.updatedAt,
-        credits: typeof record.credits === "number" ? record.credits : 5
+        credits: typeof record.credits === "number" ? Math.min(record.credits, 5) : 5
       }
     : fallback;
 
