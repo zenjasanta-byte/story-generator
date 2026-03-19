@@ -9,11 +9,18 @@ import { getUiTranslations } from "@/lib/uiTranslations";
 import { getUserStoryUsage, incrementUserStoryUsage } from "@/lib/usageStore";
 import { storyInputSchema } from "@/lib/validation";
 
-const FREE_LIMIT = 3;
-const FREE_IP_DAILY_LIMIT = 3;
-const PREMIUM_DAILY_LIMIT = 50;
-const IP_RATE_LIMIT_MAX_REQUESTS = 5;
-const IP_RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
+const FREE_LIMIT = 3; // сколько историй на аккаунт
+const FREE_IP_DAILY_LIMIT = 10; // лимит для гостей (IP)
+const PREMIUM_DAILY_LIMIT = 100; // премиум пользователи
+
+// Rate limit (защита от спама)
+const IP_RATE_LIMIT_MAX_REQUESTS =
+  process.env.NODE_ENV === "development" ? 100 : 20;
+
+const IP_RATE_LIMIT_WINDOW_MS =
+  process.env.NODE_ENV === "development"
+    ? 60 * 1000 // 1 минута в dev
+    : 5 * 60 * 1000; // 5 минут в проде
 
 export const runtime = "nodejs";
 
