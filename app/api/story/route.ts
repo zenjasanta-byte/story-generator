@@ -115,10 +115,7 @@ console.log("IDENTITY:", {
 const userId = identity.authenticatedAppUserId
   ? `user:${identity.authenticatedAppUserId}`
   : `guest:${identity.appUserId}`;
-    const userId = identity.authenticatedAppUserId
-  ? `user:${identity.authenticatedAppUserId}`
-  : `guest:${identity.appUserId}`;
-
+ 
     if (!userId) {
       return NextResponse.json({ error: "Missing user identifier." }, { status: 400 });
     }
