@@ -6,7 +6,7 @@ export default function BuyCredits() {
   };
 
   return (
-    <div style={{ display: "flex", gap: "10px" }}>
+    <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
       <button onClick={() => buyCredits(40, 1000)}>
         {"\u20AC10 - 40 credits"}
       </button>
