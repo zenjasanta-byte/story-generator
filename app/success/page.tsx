@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
-export default function SuccessPage() {
+function SuccessPageContent() {
   const params = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Confirming your payment and adding credits...");
@@ -67,5 +67,20 @@ export default function SuccessPage() {
         </Link>
       </section>
     </main>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center justify-center px-6 py-16">
+        <section className="w-full rounded-[28px] border border-white/50 bg-gradient-to-br from-[#fff6ec]/95 via-[#fff3fb]/95 to-[#edf7ff]/90 p-8 text-center shadow-[0_22px_50px_rgba(111,79,152,0.2)]">
+          <h1 className="text-3xl font-black tracking-tight text-[#38234b]">Processing Payment</h1>
+          <p className="mt-4 text-base leading-7 text-[#5c4a6f]">Confirming your payment and adding credits...</p>
+        </section>
+      </main>
+    }>
+      <SuccessPageContent />
+    </Suspense>
   );
 }
