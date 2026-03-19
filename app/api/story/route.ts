@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     let usage = await getUserStoryUsage(userId);
     let ipUsage = clientIp !== "unknown" ? await getIpStoryUsage(clientIp) : null;
 
-    if (!isPremium && ipUsage && ipUsage.storiesGenerated >= FREE_IP_DAILY_LIMIT) {
+ if (!isPremium && !identity.authenticatedAppUserId && ipUsage && ipUsage.storiesGenerated >= FREE_IP_DAILY_LIMIT) {
       console.warn("[api/story] free ip fair-use limit reached", {
         ip: clientIp,
         feature: "story_generation",
