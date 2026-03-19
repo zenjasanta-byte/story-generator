@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import BuyCredits from "@/components/BuyCredits";
 import { EmptyState } from "@/components/EmptyState";
 import { StoryForm } from "@/components/StoryForm";
 import { StoryResultCard } from "@/components/StoryResultCard";
@@ -186,28 +187,6 @@ export default function HomePage() {
     }
   }
 
-  async function buyCredits(credits: number, price: number) {
-    console.log("BUY CLICKED", credits, price);
-
-    const res = await fetch("/api/stripe/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ credits, price })
-    });
-
-    const data = await res.json();
-
-    console.log("STRIPE RESPONSE", data);
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Payment error");
-    }
-  }
-
   async function handleCopy() {
     if (!copyText) return;
     try {
@@ -375,41 +354,7 @@ export default function HomePage() {
             >
               Buy Credits
             </h3>
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "12px"
-              }}
-            >
-              <button
-                onClick={() => {
-                  console.log("CLICK €10");
-                  buyCredits(40, 1000);
-                }}
-              >
-                €10 - 40 credits
-              </button>
-
-              <button
-                onClick={() => {
-                  console.log("CLICK €20");
-                  buyCredits(100, 2000);
-                }}
-              >
-                €20 - 100 credits
-              </button>
-
-              <button
-                onClick={() => {
-                  console.log("CLICK €30");
-                  buyCredits(180, 3000);
-                }}
-              >
-                €30 - 180 credits
-              </button>
-            </div>
+            <BuyCredits />
           </div>
         </div>
 
