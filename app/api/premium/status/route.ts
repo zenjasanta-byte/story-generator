@@ -1,5 +1,16 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getCurrentUserIdentity } from "@/lib/currentUser.server";
+
+export const runtime = "nodejs";
+
+export async function GET() {
+  const identity = await getCurrentUserIdentity();
+
+  return NextResponse.json({
+    userId: identity.authenticatedAppUserId || null,
+    isPremium: false
+  });
+}
 import { type PremiumStatusResponse } from "@/lib/premiumAccess";
 import { getBillingRecord, shouldKeepPremiumForStatus } from "@/lib/premiumStore";
 
@@ -23,19 +34,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(payload);
   }
-
-  try {
-    await fetch(`${request.nextUrl.origin}/api/stripe/sync-subscription`, {
-      headers: {
-        cookie: request.headers.get("cookie") || ""
-      },
-      cache: "no-store"
-    });
-  } catch (error) {
-    console.error("[premium-status] subscription sync failed", error);
-  }
-
-  const record = await getBillingRecord(userId);
 
   const PREMIUM_USERS = [
   "7e56013c-66a6-45e2-8469-b098f83accfb"
