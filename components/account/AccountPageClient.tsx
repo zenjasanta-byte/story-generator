@@ -43,7 +43,7 @@ function maskValue(value: string | null) {
 export function AccountPageClient({ locale }: { locale: string }) {
   const currentLocale = normalizeLanguageCode(locale);
   const t = useMemo(() => getAccountCopy(currentLocale), [currentLocale]);
-  const [credits, setCredits] = useState(0);
+  const [credits, setCredits] = useState<number | null>(null);
   const [overview, setOverview] = useState<AccountOverviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -148,13 +148,15 @@ export function AccountPageClient({ locale }: { locale: string }) {
       <div
         style={{
           padding: "12px",
-          borderRadius: "10px",
-          background: "#111",
+          borderRadius: "12px",
+          background: "#1a1a1a",
           color: "#fff",
-          marginBottom: "10px"
+          marginBottom: "16px",
+          fontSize: "16px",
+          fontWeight: "bold"
         }}
       >
-        Credits: {credits}
+        💰 Credits: {credits !== null ? credits : "Loading..."}
       </div>
 
       <section className="glass-card rounded-[32px] border border-white/50 bg-gradient-to-br from-[#fff7ec]/95 via-[#fff1fb]/95 to-[#eef6ff]/92 p-8 shadow-[0_24px_56px_rgba(117,84,164,0.2)] sm:p-10">
