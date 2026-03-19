@@ -115,6 +115,8 @@ console.log("IDENTITY:", {
 const userId = identity.authenticatedAppUserId
   ? `user:${identity.authenticatedAppUserId}`
   : `guest:${identity.appUserId}`;
+// 🔥 ВРЕМЕННО: делаем тебя премиумом
+const isPremium = identity.authenticatedAppUserId === "vbh4g-1773911110353-9b91a232655f";
  
     if (!userId) {
       return NextResponse.json({ error: "Missing user identifier." }, { status: 400 });
