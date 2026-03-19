@@ -11,102 +11,11 @@ import { pushStoryHistory } from "@/lib/storyHistory";
 import { getUiTranslations } from "@/lib/uiTranslations";
 import type { SavedStory, StoryFormInput, StoryResponse } from "@/types/story";
 
-const paywallCopy: Record<
-  SupportedLanguage,
-  {
-    limitReached: string;
-    featureLocked: string;
-    openPremium: string;
-    freeStoriesLeft: string;
-    lastFreeStory: string;
-    freeStoriesFinished: string;
-    freeStoriesDescription: string;
-    checkoutFailed: string;
-  }
-> = {
-  ru: {
-    limitReached: "\u0412\u044b \u0434\u043e\u0441\u0442\u0438\u0433\u043b\u0438 \u043b\u0438\u043c\u0438\u0442\u0430 \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u044b\u0445 \u0438\u0441\u0442\u043e\u0440\u0438\u0439.",
-    featureLocked: "\u042d\u0442\u0430 \u0444\u0443\u043d\u043a\u0446\u0438\u044f \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430 \u0432 Premium.",
-    openPremium: "\u041f\u0435\u0440\u0435\u0439\u0442\u0438 \u043d\u0430 Premium",
-    freeStoriesLeft: "\u0421\u0435\u0433\u043e\u0434\u043d\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u043e \u0438\u0441\u0442\u043e\u0440\u0438\u0439: {remaining} / 3",
-    lastFreeStory: "\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u044f\u044f \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u0430\u044f \u0438\u0441\u0442\u043e\u0440\u0438\u044f",
-    freeStoriesFinished: "\u0411\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u044b\u0435 \u0438\u0441\u0442\u043e\u0440\u0438\u0438 \u0437\u0430\u043a\u043e\u043d\u0447\u0438\u043b\u0438\u0441\u044c",
-    freeStoriesDescription: "\u041e\u0444\u043e\u0440\u043c\u0438\u0442\u0435 Premium, \u0447\u0442\u043e\u0431\u044b \u0441\u043e\u0437\u0434\u0430\u0432\u0430\u0442\u044c \u0431\u043e\u043b\u044c\u0448\u0435 \u0438\u0441\u0442\u043e\u0440\u0438\u0439.",
-    checkoutFailed: "\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043a\u0440\u044b\u0442\u044c \u043e\u043f\u043b\u0430\u0442\u0443. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437."
-  },
-  en: {
-    limitReached: "You have reached the free story limit.",
-    featureLocked: "This feature is available in Premium.",
-    openPremium: "Unlock Premium",
-    freeStoriesLeft: "Free stories left: {remaining} / 3",
-    lastFreeStory: "Last free story",
-    freeStoriesFinished: "Your free stories are finished",
-    freeStoriesDescription: "Unlock unlimited magical stories for your child.",
-    checkoutFailed: "Could not open checkout. Please try again."
-  },
-  es: {
-    limitReached: "Has alcanzado el limite gratuito de historias.",
-    featureLocked: "Esta funcion esta disponible en Premium.",
-    openPremium: "Abrir Premium",
-    freeStoriesLeft: "Historias gratis restantes: {remaining} / 3",
-    lastFreeStory: "Ultima historia gratis",
-    freeStoriesFinished: "Tus historias gratis se han terminado",
-    freeStoriesDescription: "Desbloquea historias magicas ilimitadas para tu hijo.",
-    checkoutFailed: "No se pudo abrir el pago. Intentalo de nuevo."
-  },
-  de: {
-    limitReached: "Du hast das kostenlose Geschichtenlimit erreicht.",
-    featureLocked: "Diese Funktion ist in Premium verfuegbar.",
-    openPremium: "Premium oeffnen",
-    freeStoriesLeft: "Kostenlose Geschichten uebrig: {remaining} / 3",
-    lastFreeStory: "Letzte kostenlose Geschichte",
-    freeStoriesFinished: "Deine kostenlosen Geschichten sind aufgebraucht",
-    freeStoriesDescription: "Schalte unbegrenzt magische Geschichten fuer dein Kind frei.",
-    checkoutFailed: "Checkout konnte nicht geoeffnet werden. Bitte versuche es erneut."
-  },
-  fr: {
-    limitReached: "Vous avez atteint la limite gratuite d'histoires.",
-    featureLocked: "Cette fonctionnalite est disponible en Premium.",
-    openPremium: "Ouvrir Premium",
-    freeStoriesLeft: "Histoires gratuites restantes : {remaining} / 3",
-    lastFreeStory: "Derniere histoire gratuite",
-    freeStoriesFinished: "Vos histoires gratuites sont terminees",
-    freeStoriesDescription: "Debloquez des histoires magiques illimitees pour votre enfant.",
-    checkoutFailed: "Impossible d'ouvrir le paiement. Veuillez reessayer."
-  },
-  it: {
-    limitReached: "Hai raggiunto il limite gratuito di storie.",
-    featureLocked: "Questa funzione e disponibile in Premium.",
-    openPremium: "Apri Premium",
-    freeStoriesLeft: "Storie gratuite rimanenti: {remaining} / 3",
-    lastFreeStory: "Ultima storia gratuita",
-    freeStoriesFinished: "Le tue storie gratuite sono finite",
-    freeStoriesDescription: "Sblocca storie magiche illimitate per il tuo bambino.",
-    checkoutFailed: "Impossibile aprire il pagamento. Riprova."
-  },
-  pt: {
-    limitReached: "Voce atingiu o limite gratuito de historias.",
-    featureLocked: "Este recurso esta disponivel no Premium.",
-    openPremium: "Abrir Premium",
-    freeStoriesLeft: "Historias gratis restantes: {remaining} / 3",
-    lastFreeStory: "Ultima historia gratis",
-    freeStoriesFinished: "Suas historias gratis acabaram",
-    freeStoriesDescription: "Desbloqueie historias magicas ilimitadas para sua crianca.",
-    checkoutFailed: "Nao foi possivel abrir o pagamento. Tente novamente."
-  },
-  zh: {
-    limitReached: "\u60a8\u5df2\u8fbe\u5230\u514d\u8d39\u6545\u4e8b\u6570\u91cf\u9650\u5236",
-    featureLocked: "\u6b64\u529f\u80fd\u4ec5\u5728 Premium \u4e2d\u53ef\u7528\u3002",
-    openPremium: "\u5347\u7ea7 Premium",
-    freeStoriesLeft: "\u4eca\u5929\u521b\u5efa\u7684\u6545\u4e8b\uff1a{remaining} / 3",
-    lastFreeStory: "\u6700\u540e\u4e00\u4e2a\u514d\u8d39\u6545\u4e8b",
-    freeStoriesFinished: "\u514d\u8d39\u6545\u4e8b\u6b21\u6570\u5df2\u7528\u5b8c",
-    freeStoriesDescription: "\u5347\u7ea7\u5230 Premium \u4ee5\u89e3\u9501\u65e0\u9650\u6545\u4e8b",
-    checkoutFailed: "\u65e0\u6cd5\u6253\u5f00\u7ed3\u8d26\u9875\u9762\uff0c\u8bf7\u91cd\u8bd5\u3002"
-  }
+type AccountOverviewResponse = {
+  isAuthenticated: boolean;
 };
 
-function localeToStoryLanguage(locale: SupportedLanguage): string {
+function localeToStoryLanguage(locale: ReturnType<typeof normalizeLanguageCode>): string {
   const map: Record<SupportedLanguage, string> = {
     en: "English",
     ru: "Russian",
@@ -134,9 +43,8 @@ export default function HomePage() {
   const [storyViewKey, setStoryViewKey] = useState(0);
   const [selectedStoryLanguage, setSelectedStoryLanguage] = useState(() => localeToStoryLanguage(currentLocale));
   const [paywallMessage, setPaywallMessage] = useState<string | null>(null);
-  const languageCode = useMemo(() => normalizeLanguageCode(selectedStoryLanguage), [selectedStoryLanguage]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const t = useMemo(() => getUiTranslations(selectedStoryLanguage), [selectedStoryLanguage]);
-  const tPaywall = useMemo(() => paywallCopy[languageCode] || paywallCopy.en, [languageCode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -156,6 +64,31 @@ export default function HomePage() {
     }
 
     void loadCredits();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAccountState() {
+      try {
+        const response = await fetch("/api/account/overview", { cache: "no-store" });
+        const payload = (await response.json()) as AccountOverviewResponse;
+
+        if (!cancelled) {
+          setIsAuthenticated(Boolean(payload?.isAuthenticated));
+        }
+      } catch {
+        if (!cancelled) {
+          setIsAuthenticated(false);
+        }
+      }
+    }
+
+    void loadAccountState();
 
     return () => {
       cancelled = true;
@@ -299,7 +232,7 @@ export default function HomePage() {
       if (response.status === 403) {
         const payload = await response.json().catch(() => ({}));
         if (payload?.upgradeRequired) {
-          setPaywallMessage(tPaywall.featureLocked);
+          setPaywallMessage(payload?.error || "Недостаточно кредитов");
           return;
         }
       }
@@ -372,10 +305,13 @@ export default function HomePage() {
             onLanguageChange={handleLanguageChange}
             footerContent={
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-[#5b466f]">Осталось кредитов: {credits}</p>
+                <p className="text-sm font-semibold text-[#5b466f]">Кредиты: {credits}</p>
+                {!isAuthenticated ? <p className="text-sm font-semibold text-[#9f4967]">Войдите чтобы создать историю</p> : null}
+                {isAuthenticated && credits < 5 ? <p className="text-sm font-semibold text-[#9f4967]">Недостаточно кредитов</p> : null}
                 {paywallMessage ? <p className="text-sm font-semibold text-[#9f4967]">{paywallMessage}</p> : null}
               </div>
             }
+            submitDisabled={!isAuthenticated || credits < 5}
           />
 
           <div

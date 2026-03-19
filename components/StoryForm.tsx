@@ -8,6 +8,7 @@ import type { StoryFormInput, StoryLength, StoryStyle } from "@/types/story";
 type StoryFormProps = {
   onGenerate: (input: StoryFormInput, turnstileToken: string) => Promise<void>;
   loading: boolean;
+  submitDisabled?: boolean;
   initialLanguage?: string;
   onLanguageChange?: (language: string) => void;
   footerContent?: React.ReactNode;
@@ -58,7 +59,14 @@ const presets: Array<{ key: "bedtime" | "friendship" | "educational"; data: Part
 
 const languageOptions = ["English", "Russian", "Spanish", "German", "French", "Italian", "Portuguese", "Chinese"];
 
-export function StoryForm({ onGenerate, loading, initialLanguage = "English", onLanguageChange, footerContent }: StoryFormProps) {
+export function StoryForm({
+  onGenerate,
+  loading,
+  submitDisabled = false,
+  initialLanguage = "English",
+  onLanguageChange,
+  footerContent
+}: StoryFormProps) {
   const [formData, setFormData] = useState<StoryFormInput>(() => buildDefaultData(initialLanguage));
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileError, setTurnstileError] = useState<string | null>(null);
@@ -212,7 +220,7 @@ export function StoryForm({ onGenerate, loading, initialLanguage = "English", on
       <div className="mt-7 flex flex-wrap items-center gap-3">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || submitDisabled}
           className="storybook-button storybook-button-primary px-7 py-4 text-base disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? t.buttons.generating : t.buttons.generate}
