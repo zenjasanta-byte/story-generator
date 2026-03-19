@@ -186,25 +186,22 @@ export default function HomePage() {
     }
   }
 
-  async function buyCredits(creditsAmount: number, price: number) {
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ credits: creditsAmount, price })
-      });
+  async function buyCredits(credits: number, price: number) {
+    const res = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ credits, price })
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok || !data?.url) {
-        throw new Error(data?.error || "Could not start checkout");
-      }
-
+    if (data.url) {
       window.location.href = data.url;
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Could not start checkout");
+    } else {
+      console.error("Stripe error", data);
+      alert("Payment error");
     }
   }
 
