@@ -122,7 +122,7 @@ export default function HomePage() {
 
   async function handleGenerate(input: StoryFormInput, turnstileToken: string) {
     if (credits < 5) {
-      alert("Not enough credits");
+      setPaywallMessage("Недостаточно кредитов");
       return;
     }
 
