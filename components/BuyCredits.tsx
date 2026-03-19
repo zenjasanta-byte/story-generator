@@ -7,9 +7,17 @@ export default function BuyCredits() {
 
   return (
     <div>
-      <button onClick={() => buyCredits(40, 1000)}>â‚¬10</button>
-      <button onClick={() => buyCredits(100, 2000)}>â‚¬20</button>
-      <button onClick={() => buyCredits(180, 3000)}>â‚¬30</button>
+      <button onClick={() => buyCredits(40, 1000)}>
+        €10 - 40 credits
+      </button>
+
+      <button onClick={() => buyCredits(100, 2000)}>
+        €20 - 100 credits
+      </button>
+
+      <button onClick={() => buyCredits(180, 3000)}>
+        €30 - 180 credits
+      </button>
     </div>
   );
 }
