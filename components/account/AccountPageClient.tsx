@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -94,25 +94,8 @@ export function AccountPageClient({ locale }: { locale: string }) {
     if (portalLoading) return;
 
     setPortalLoading(true);
-    setPortalError(null);
-
-    try {
-      const response = await fetch("/api/stripe/portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale: currentLocale })
-      });
-
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload?.url) {
-        throw new Error(payload?.error || t.portalError);
-      }
-
-      window.location.href = String(payload.url);
-    } catch (error: unknown) {
-      setPortalError(error instanceof Error ? error.message : t.portalError);
-      setPortalLoading(false);
-    }
+    setPortalError(t.portalError);
+    setPortalLoading(false);
   }
 
   const planLabel = overview?.plan === "premium" ? t.premiumPlan : t.freePlan;
@@ -274,3 +257,4 @@ export function AccountPageClient({ locale }: { locale: string }) {
     </main>
   );
 }
+

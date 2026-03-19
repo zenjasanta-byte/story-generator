@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -201,25 +201,8 @@ export default function HomePage() {
     if (portalLoading) return;
 
     setPortalLoading(true);
-    setPortalError(null);
-
-    try {
-      const response = await fetch("/api/stripe/portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale: currentLocale })
-      });
-
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload?.url) {
-        throw new Error(payload?.error || t.home.subscription.portalFailed);
-      }
-
-      window.location.href = String(payload.url);
-    } catch (err: unknown) {
-      setPortalError(err instanceof Error ? err.message : t.home.subscription.portalFailed);
-      setPortalLoading(false);
-    }
+    setPortalError(t.home.subscription.portalFailed);
+    setPortalLoading(false);
   }
 
   async function handleGenerate(input: StoryFormInput, turnstileToken: string) {

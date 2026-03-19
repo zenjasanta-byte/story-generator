@@ -564,52 +564,18 @@ export default function PremiumPage() {
     if (checkoutLoading) return;
 
     setCheckoutLoading(true);
-    setCheckoutError(null);
+    setCheckoutError(tPremium.checkoutError);
     setPortalError(null);
-
-    try {
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale: currentLocale, plan })
-      });
-
-      const payload = await response.json();
-      if (!response.ok || !payload?.url) {
-        throw new Error(payload?.error || tPremium.checkoutError);
-      }
-
-      window.location.href = payload.url;
-    } catch (error: unknown) {
-      setCheckoutError(error instanceof Error ? error.message : tPremium.checkoutError);
-      setCheckoutLoading(false);
-    }
+    setCheckoutLoading(false);
   }
 
   async function handleOpenPortal() {
     if (portalLoading) return;
 
     setPortalLoading(true);
-    setPortalError(null);
+    setPortalError(tPremium.portalError);
     setCheckoutError(null);
-
-    try {
-      const response = await fetch("/api/stripe/portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale: currentLocale })
-      });
-
-      const payload = await response.json();
-      if (!response.ok || !payload?.url) {
-        throw new Error(payload?.error || tPremium.portalError);
-      }
-
-      window.location.href = payload.url;
-    } catch (error: unknown) {
-      setPortalError(error instanceof Error ? error.message : tPremium.portalError);
-      setPortalLoading(false);
-    }
+    setPortalLoading(false);
   }
 
   return (
@@ -750,3 +716,4 @@ export default function PremiumPage() {
     </main>
   );
 }
+

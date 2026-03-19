@@ -1,4 +1,4 @@
-import { readMutableJsonStore, resolveDataFile, writeMutableJsonStore } from "@/lib/mutableJsonStore";
+﻿import { readMutableJsonStore, resolveDataFile, writeMutableJsonStore } from "@/lib/mutableJsonStore";
 
 export type UserStoryUsageRecord = {
   userId: string;
@@ -6,7 +6,7 @@ export type UserStoryUsageRecord = {
   dailyStoriesGenerated: number;
   dailyWindowStartedAt: string;
   updatedAt: string;
-  credits: number; // 👈 ДОБАВЬ
+  credits: number;
 };
 
 type UsageStore = Record<string, UserStoryUsageRecord>;
@@ -16,14 +16,15 @@ const STORE_PATH = resolveDataFile("story-usage.json");
 
 function createDefaultUsage(userId: string): UserStoryUsageRecord {
   const now = new Date().toISOString();
+
   return {
-  userId,
-  storiesGenerated: 0,
-  dailyStoriesGenerated: 0,
-  dailyWindowStartedAt: now,
-  updatedAt: now,
-  credits: 10 // 👈 стартовые кредиты
-};
+    userId,
+    storiesGenerated: 0,
+    dailyStoriesGenerated: 0,
+    dailyWindowStartedAt: now,
+    updatedAt: now,
+    credits: 10
+  };
 }
 
 function isDailyWindowExpired(windowStartedAt: string, now = Date.now()) {
@@ -38,14 +39,14 @@ function isDailyWindowExpired(windowStartedAt: string, now = Date.now()) {
 function normalizeUsageRecord(record: UserStoryUsageRecord | undefined, userId: string): UserStoryUsageRecord {
   const fallback = createDefaultUsage(userId);
   const base = record
-  ? {
-      userId,
-      storiesGenerated: typeof record.storiesGenerated === "number" ? record.storiesGenerated : 0,
-      dailyStoriesGenerated: typeof record.dailyStoriesGenerated === "number" ? record.dailyStoriesGenerated : 0,
-      dailyWindowStartedAt: typeof record.dailyWindowStartedAt === "string" ? record.dailyWindowStartedAt : record.updatedAt,
-      updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : fallback.updatedAt,
-      credits: typeof record.credits === "number" ? record.credits : 10 // 👈 ВОТ ЭТО
-    }
+    ? {
+        userId,
+        storiesGenerated: typeof record.storiesGenerated === "number" ? record.storiesGenerated : 0,
+        dailyStoriesGenerated: typeof record.dailyStoriesGenerated === "number" ? record.dailyStoriesGenerated : 0,
+        dailyWindowStartedAt: typeof record.dailyWindowStartedAt === "string" ? record.dailyWindowStartedAt : record.updatedAt,
+        updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : fallback.updatedAt,
+        credits: typeof record.credits === "number" ? record.credits : 10
+      }
     : fallback;
 
   if (isDailyWindowExpired(base.dailyWindowStartedAt)) {
@@ -95,20 +96,22 @@ export async function incrementUserStoryUsage(userId: string): Promise<UserStory
     storiesGenerated: current.storiesGenerated + 1,
     dailyStoriesGenerated: current.dailyStoriesGenerated + 1,
     dailyWindowStartedAt: current.dailyWindowStartedAt,
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    credits: current.credits
   };
 
   store[userId] = next;
   await writeStore(store);
   return next;
 }
+
 export async function decrementUserCredits(userId: string, amount: number): Promise<UserStoryUsageRecord> {
   const store = await readStore();
   const current = normalizeUsageRecord(store[userId], userId);
 
   const next: UserStoryUsageRecord = {
     ...current,
-    credits: Math.max((current.credits || 0) - amount, 0),
+    credits: Math.max(current.credits - amount, 0),
     updatedAt: new Date().toISOString()
   };
 

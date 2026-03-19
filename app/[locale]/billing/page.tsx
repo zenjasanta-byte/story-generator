@@ -360,27 +360,8 @@ export default function BillingPage() {
     if (activeAction) return;
 
     setActiveAction(action);
-    setPortalError(null);
-
-    const route = action === "change-plan" ? "/api/stripe/portal/change-plan" : action === "cancel" ? "/api/stripe/portal/cancel" : "/api/stripe/portal";
-
-    try {
-      const response = await fetch(route, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale: currentLocale })
-      });
-
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload?.url) {
-        throw new Error(payload?.error || t.portalError);
-      }
-
-      window.location.href = String(payload.url);
-    } catch (error: unknown) {
-      setPortalError(error instanceof Error ? error.message : t.portalError);
-      setActiveAction(null);
-    }
+    setPortalError(t.portalError);
+    setActiveAction(null);
   }
 
   const isPremium = Boolean(status?.isPremium);
@@ -513,3 +494,4 @@ export default function BillingPage() {
     </main>
   );
 }
+
