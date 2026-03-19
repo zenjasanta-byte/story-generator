@@ -6,6 +6,7 @@ export type UserStoryUsageRecord = {
   dailyStoriesGenerated: number;
   dailyWindowStartedAt: string;
   updatedAt: string;
+  credits: number; // 👈 ДОБАВЬ
 };
 
 type UsageStore = Record<string, UserStoryUsageRecord>;
@@ -16,12 +17,13 @@ const STORE_PATH = resolveDataFile("story-usage.json");
 function createDefaultUsage(userId: string): UserStoryUsageRecord {
   const now = new Date().toISOString();
   return {
-    userId,
-    storiesGenerated: 0,
-    dailyStoriesGenerated: 0,
-    dailyWindowStartedAt: now,
-    updatedAt: now
-  };
+  userId,
+  storiesGenerated: 0,
+  dailyStoriesGenerated: 0,
+  dailyWindowStartedAt: now,
+  updatedAt: now,
+  credits: 10 // 👈 стартовые кредиты
+};
 }
 
 function isDailyWindowExpired(windowStartedAt: string, now = Date.now()) {
@@ -36,13 +38,14 @@ function isDailyWindowExpired(windowStartedAt: string, now = Date.now()) {
 function normalizeUsageRecord(record: UserStoryUsageRecord | undefined, userId: string): UserStoryUsageRecord {
   const fallback = createDefaultUsage(userId);
   const base = record
-    ? {
-        userId,
-        storiesGenerated: typeof record.storiesGenerated === "number" ? record.storiesGenerated : 0,
-        dailyStoriesGenerated: typeof record.dailyStoriesGenerated === "number" ? record.dailyStoriesGenerated : 0,
-        dailyWindowStartedAt: typeof record.dailyWindowStartedAt === "string" ? record.dailyWindowStartedAt : record.updatedAt,
-        updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : fallback.updatedAt
-      }
+  ? {
+      userId,
+      storiesGenerated: typeof record.storiesGenerated === "number" ? record.storiesGenerated : 0,
+      dailyStoriesGenerated: typeof record.dailyStoriesGenerated === "number" ? record.dailyStoriesGenerated : 0,
+      dailyWindowStartedAt: typeof record.dailyWindowStartedAt === "string" ? record.dailyWindowStartedAt : record.updatedAt,
+      updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : fallback.updatedAt,
+      credits: typeof record.credits === "number" ? record.credits : 10 // 👈 ВОТ ЭТО
+    }
     : fallback;
 
   if (isDailyWindowExpired(base.dailyWindowStartedAt)) {
@@ -97,5 +100,20 @@ export async function incrementUserStoryUsage(userId: string): Promise<UserStory
 
   store[userId] = next;
   await writeStore(store);
+  return next;
+}
+export async function decrementUserCredits(userId: string, amount: number): Promise<UserStoryUsageRecord> {
+  const store = await readStore();
+  const current = normalizeUsageRecord(store[userId], userId);
+
+  const next: UserStoryUsageRecord = {
+    ...current,
+    credits: Math.max((current.credits || 0) - amount, 0),
+    updatedAt: new Date().toISOString()
+  };
+
+  store[userId] = next;
+  await writeStore(store);
+
   return next;
 }
