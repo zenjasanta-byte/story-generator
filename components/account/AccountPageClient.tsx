@@ -43,10 +43,32 @@ function maskValue(value: string | null) {
 export function AccountPageClient({ locale }: { locale: string }) {
   const currentLocale = normalizeLanguageCode(locale);
   const t = useMemo(() => getAccountCopy(currentLocale), [currentLocale]);
+  const [credits, setCredits] = useState(0);
   const [overview, setOverview] = useState<AccountOverviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
   const [portalError, setPortalError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/credits")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) {
+          setCredits(data.credits);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCredits(0);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -121,6 +143,18 @@ export function AccountPageClient({ locale }: { locale: string }) {
         <div className="hero-orb hero-orb-alt right-[8%] top-[18%]" />
         <span className="fairy-sparkle left-[18%] top-[24%]" />
         <span className="fairy-sparkle right-[25%] top-[20%]" style={{ animationDelay: "0.8s" }} />
+      </div>
+
+      <div
+        style={{
+          padding: "12px",
+          borderRadius: "10px",
+          background: "#111",
+          color: "#fff",
+          marginBottom: "10px"
+        }}
+      >
+        Credits: {credits}
       </div>
 
       <section className="glass-card rounded-[32px] border border-white/50 bg-gradient-to-br from-[#fff7ec]/95 via-[#fff1fb]/95 to-[#eef6ff]/92 p-8 shadow-[0_24px_56px_rgba(117,84,164,0.2)] sm:p-10">
