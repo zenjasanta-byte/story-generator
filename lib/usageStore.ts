@@ -45,7 +45,7 @@ function normalizeUsageRecord(record: UserStoryUsageRecord | undefined, userId: 
         dailyStoriesGenerated: typeof record.dailyStoriesGenerated === "number" ? record.dailyStoriesGenerated : 0,
         dailyWindowStartedAt: typeof record.dailyWindowStartedAt === "string" ? record.dailyWindowStartedAt : record.updatedAt,
         updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : fallback.updatedAt,
-        credits: typeof record.credits === "number" ? Math.min(record.credits, 5) : 5
+        credits: typeof record.credits === "number" ? Math.max(record.credits, 0) : 5
       }
     : fallback;
 
@@ -112,6 +112,22 @@ export async function decrementUserCredits(userId: string, amount: number): Prom
   const next: UserStoryUsageRecord = {
     ...current,
     credits: Math.max(current.credits - amount, 0),
+    updatedAt: new Date().toISOString()
+  };
+
+  store[userId] = next;
+  await writeStore(store);
+
+  return next;
+}
+
+export async function incrementUserCredits(userId: string, amount: number): Promise<UserStoryUsageRecord> {
+  const store = await readStore();
+  const current = normalizeUsageRecord(store[userId], userId);
+
+  const next: UserStoryUsageRecord = {
+    ...current,
+    credits: current.credits + Math.max(amount, 0),
     updatedAt: new Date().toISOString()
   };
 

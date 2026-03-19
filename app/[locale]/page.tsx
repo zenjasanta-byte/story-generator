@@ -186,9 +186,26 @@ export default function HomePage() {
     }
   }
 
-  async function buyCredits(amount: number) {
-    void amount;
-    alert("Payment system will be connected here");
+  async function buyCredits(creditsAmount: number, price: number) {
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ credits: creditsAmount, price })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error || "Could not start checkout");
+      }
+
+      window.location.href = data.url;
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Could not start checkout");
+    }
   }
 
   async function handleCopy() {
@@ -368,7 +385,7 @@ export default function HomePage() {
             >
               <button
                 type="button"
-                onClick={() => void buyCredits(40)}
+                onClick={() => void buyCredits(40, 1000)}
                 style={{
                   border: "none",
                   borderRadius: "999px",
@@ -393,7 +410,7 @@ export default function HomePage() {
 
               <button
                 type="button"
-                onClick={() => void buyCredits(100)}
+                onClick={() => void buyCredits(100, 2000)}
                 style={{
                   border: "none",
                   borderRadius: "999px",
@@ -418,7 +435,7 @@ export default function HomePage() {
 
               <button
                 type="button"
-                onClick={() => void buyCredits(180)}
+                onClick={() => void buyCredits(180, 3000)}
                 style={{
                   border: "none",
                   borderRadius: "999px",
