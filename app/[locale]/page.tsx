@@ -7,7 +7,6 @@ import { EmptyState } from "@/components/EmptyState";
 import { StoryForm } from "@/components/StoryForm";
 import { StoryResultCard } from "@/components/StoryResultCard";
 import { normalizeLanguageCode, type SupportedLanguage } from "@/lib/narrationVoices";
-import { FREE_STORY_LIMIT, type PremiumStatusResponse } from "@/lib/premiumAccess";
 import { pushStoryHistory } from "@/lib/storyHistory";
 import { getUiTranslations } from "@/lib/uiTranslations";
 import type { SavedStory, StoryFormInput, StoryResponse } from "@/types/story";
@@ -126,6 +125,7 @@ export default function HomePage() {
   const params = useParams<{locale: string}>();
   const router = useRouter();
   const currentLocale = normalizeLanguageCode(String(params.locale || "en"));
+  const [credits, setCredits] = useState(0);
   const [story, setStory] = useState<StoryResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,35 +133,29 @@ export default function HomePage() {
   const [lastChildName, setLastChildName] = useState<string>("");
   const [storyViewKey, setStoryViewKey] = useState(0);
   const [selectedStoryLanguage, setSelectedStoryLanguage] = useState(() => localeToStoryLanguage(currentLocale));
-  const [freeStoryCount, setFreeStoryCount] = useState(0);
   const [paywallMessage, setPaywallMessage] = useState<string | null>(null);
-  const [portalError, setPortalError] = useState<string | null>(null);
-  const [portalLoading, setPortalLoading] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
   const languageCode = useMemo(() => normalizeLanguageCode(selectedStoryLanguage), [selectedStoryLanguage]);
   const t = useMemo(() => getUiTranslations(selectedStoryLanguage), [selectedStoryLanguage]);
   const tPaywall = useMemo(() => paywallCopy[languageCode] || paywallCopy.en, [languageCode]);
-  const storiesUsed = freeStoryCount;
-  const freeStoriesLeft = Math.max(FREE_STORY_LIMIT - storiesUsed, 0);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadPremiumStatus() {
+    async function loadCredits() {
       try {
-        const response = await fetch("/api/premium/status", { cache: "no-store" });
-        const payload = (await response.json()) as PremiumStatusResponse;
+        const response = await fetch("/api/credits", { cache: "no-store" });
+        const payload = await response.json();
         if (!cancelled) {
-          setIsPremium(Boolean(payload.isPremium));
+          setCredits(Number(payload?.credits) || 0);
         }
       } catch {
         if (!cancelled) {
-          setIsPremium(false);
+          setCredits(0);
         }
       }
     }
 
-    void loadPremiumStatus();
+    void loadCredits();
 
     return () => {
       cancelled = true;
@@ -192,20 +186,12 @@ export default function HomePage() {
     }
   }
 
-  function openPremiumPage() {
-    setPaywallMessage(null);
-    router.push(`/${currentLocale}/premium`);
-  }
-
-  async function handleOpenPortal() {
-    if (portalLoading) return;
-
-    setPortalLoading(true);
-    setPortalError(t.home.subscription.portalFailed);
-    setPortalLoading(false);
-  }
-
   async function handleGenerate(input: StoryFormInput, turnstileToken: string) {
+    if (credits < 5) {
+      alert("Not enough credits");
+      return;
+    }
+
     setSelectedStoryLanguage(input.language);
 
     setLoading(true);
@@ -227,10 +213,7 @@ export default function HomePage() {
       const payload = await response.json();
       if (!response.ok) {
         if (payload?.upgradeRequired) {
-          setPaywallMessage(t.home.errors.freeLimitReached || tPaywall.limitReached);
-          if (typeof payload?.storiesRemaining === "number") {
-            setFreeStoryCount(FREE_STORY_LIMIT - payload.storiesRemaining);
-          }
+          setPaywallMessage(payload?.error || t.home.errors.generateFailed);
           return;
         }
 
@@ -260,8 +243,8 @@ export default function HomePage() {
       };
       pushStoryHistory(item);
 
-      if (!isPremium && typeof payload?.storiesRemaining === "number") {
-        setFreeStoryCount(FREE_STORY_LIMIT - payload.storiesRemaining);
+      if (typeof payload?.creditsRemaining === "number") {
+        setCredits(payload.creditsRemaining);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t.home.errors.unexpected);
@@ -382,98 +365,37 @@ export default function HomePage() {
 
       <div className="grid gap-8 lg:grid-cols-[1.1fr,1fr] lg:items-start">
         <div className="space-y-4">
-          {isPremium ? (
-            <section className="rounded-[24px] border border-[#ddd0f8] bg-gradient-to-br from-[#fff8ef] via-[#fff3fb] to-[#eef5ff] p-5 shadow-[0_12px_26px_rgba(149,105,174,0.12)]">
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#9a5f2f]">Premium</p>
-              <p className="mt-2 text-sm font-medium text-[#5b466f]">{t.home.subscription.activeDescription}</p>
-              <button
-                type="button"
-                onClick={() => void handleOpenPortal()}
-                disabled={portalLoading}
-                className="mt-4 inline-flex rounded-full border border-[#d9c7f8] bg-white/85 px-5 py-3 text-sm font-semibold text-[#6b4a8b] shadow-[0_10px_20px_rgba(124,89,170,0.12)] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {portalLoading ? t.home.subscription.opening : t.home.subscription.manageButton}
-              </button>
-              {portalError ? <p className="mt-3 text-sm font-semibold text-[#9f4967]">{portalError}</p> : null}
-            </section>
-          ) : null}
-
           <StoryForm
             onGenerate={handleGenerate}
             loading={loading}
             initialLanguage={localeToStoryLanguage(currentLocale)}
             onLanguageChange={handleLanguageChange}
             footerContent={
-              !isPremium ? (
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold text-[#5b466f]">{tPaywall.freeStoriesLeft.replace("{remaining}", String(freeStoriesLeft))}</p>
-                  {freeStoriesLeft === 1 ? <p className="text-sm font-semibold text-[#b26a29]">{tPaywall.lastFreeStory}</p> : null}
-                  {freeStoriesLeft === 0 ? (
-                    <div className="rounded-[24px] border border-[#f4d8c2] bg-gradient-to-br from-[#fff8ee] to-[#fff1fb] p-5 shadow-[0_12px_26px_rgba(149,105,174,0.12)]">
-                      <p className="text-base font-bold text-[#4f3568]">{tPaywall.freeStoriesFinished}</p>
-                      <p className="mt-2 text-sm text-[#5b466f]">{tPaywall.freeStoriesDescription}</p>
-                      <button
-                        type="button"
-                        onClick={openPremiumPage}
-                        className="mt-4 inline-flex rounded-full border border-[#efc9da] bg-[#fff6fb] px-4 py-2 text-sm font-semibold text-[#9f4967] transition hover:bg-white"
-                      >
-                        {tPaywall.openPremium}
-                      </button>
-                    </div>
-                  ) : null}
-                  {paywallMessage ? <p className="text-sm font-semibold text-[#9f4967]">{paywallMessage}</p> : null}
-                </div>
-              ) : null
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-[#5b466f]">Осталось кредитов: {credits}</p>
+                {paywallMessage ? <p className="text-sm font-semibold text-[#9f4967]">{paywallMessage}</p> : null}
+              </div>
             }
           />
 
-          {!isPremium ? (
-            <section className="rounded-[26px] border border-[#ecd5bf] bg-gradient-to-br from-[#fffaf2] via-[#fff4fb] to-[#eef6ff] p-5 shadow-[0_14px_30px_rgba(132,96,177,0.12)]">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#9a5f2f]">{t.home.pricing.title}</p>
-                  <p className="mt-2 text-sm text-[#6a5a7f]">{t.home.pricing.subtitle}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={openPremiumPage}
-                  className="storybook-button storybook-button-primary px-5 py-3 text-sm"
-                >
-                  {t.home.pricing.startPremium}
-                </button>
-              </div>
-
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                <article className="rounded-[22px] border border-[#f1decc] bg-white/80 p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-xl font-black text-[#3b2551]">{t.home.pricing.freeLabel}</h2>
-                    <span className="rounded-full border border-[#ead8bf] bg-[#fff8ef] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#9a5f2f]">
-                      {t.home.pricing.freeLabel}
-                    </span>
-                  </div>
-                  <ul className="mt-4 space-y-2 text-sm text-[#5c4c70]">
-                    <li>{t.home.pricing.freeStories}</li>
-                    <li>{t.home.pricing.freeTextOnly}</li>
-                  </ul>
-                </article>
-
-                <article className="rounded-[22px] border border-[#e6c4ff] bg-gradient-to-br from-[#fff6f1] via-[#fff1fb] to-[#edf3ff] p-5 shadow-[0_12px_24px_rgba(136,96,184,0.14)]">
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-xl font-black text-[#3b2551]">{t.home.pricing.premiumLabel}</h2>
-                    <span className="rounded-full bg-gradient-to-r from-[#fff0d9] to-[#ffe6bf] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#a7642d]">
-                      {t.home.pricing.premiumLabel}
-                    </span>
-                  </div>
-                  <ul className="mt-4 space-y-2 text-sm text-[#5c4c70]">
-                    <li>{t.home.pricing.premiumUnlimited}</li>
-                    <li>{t.home.pricing.premiumImages}</li>
-                    <li>{t.home.pricing.premiumAudio}</li>
-                    <li>{t.home.pricing.premiumExports}</li>
-                  </ul>
-                </article>
-              </div>
-            </section>
-          ) : null}
+          <div
+            style={{
+              padding: "16px",
+              borderRadius: "16px",
+              background: "linear-gradient(135deg, #1a1a1a, #2a2a2a)",
+              color: "#fff",
+              marginTop: "20px",
+              textAlign: "center"
+            }}
+          >
+            <h3>💰 Your Credits</h3>
+            <p style={{ fontSize: "24px", fontWeight: "bold" }}>
+              {credits}
+            </p>
+            <p style={{ opacity: 0.7 }}>
+              1 story = 5 credits
+            </p>
+          </div>
         </div>
 
         <div className="space-y-5">
@@ -495,9 +417,9 @@ export default function HomePage() {
               data={story}
               childName={lastChildName || undefined}
               storyLanguage={selectedStoryLanguage}
-              isPremium={isPremium}
-              premiumFeatureMessage={tPaywall.featureLocked}
-              premiumCtaLabel={tPaywall.openPremium}
+              isPremium={false}
+              premiumFeatureMessage="Not enough credits"
+              premiumCtaLabel="Credits"
               onCopy={handleCopy}
               onDownload={handleDownload}
               onDownloadPdf={handleDownloadPdf}
