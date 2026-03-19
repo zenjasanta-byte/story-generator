@@ -103,63 +103,78 @@ export async function POST(request: Request) {
       }
     }
 
-  const identity = await getCurrentUserIdentity();
+const identity = await getCurrentUserIdentity();
 
-// лог оставь временно
+// лог (оставь для проверки)
 console.log("IDENTITY:", {
   appUserId: identity.appUserId,
   authenticatedAppUserId: identity.authenticatedAppUserId
 });
 
-// userId
+// единый userId (НЕ трогай больше)
 const userId = identity.authenticatedAppUserId
   ? `user:${identity.authenticatedAppUserId}`
   : `guest:${identity.appUserId}`;
 
-// ✅ ПРАВИЛЬНЫЙ premium (только один!)
-const isPremium = identity.authenticatedAppUserId === "9pk5r-1773912436064-858a3f7b55f0";
- 
-    if (!userId) {
-      return NextResponse.json({ error: "Missing user identifier." }, { status: 400 });
-    }
+// ✅ твой premium ID
+const PREMIUM_USERS = [
+  "7e56013c-66a6-45e2-8469-b098f83accfb"
+];
 
+// проверка premium
+const authUserId = identity?.authenticatedAppUserId || "";
+const cleanId = authUserId.trim();
 
-    let usage = await getUserStoryUsage(userId);
-    let ipUsage = clientIp !== "unknown" ? await getIpStoryUsage(clientIp) : null;
+const isPremium = PREMIUM_USERS.includes(cleanId);
 
- if (!isPremium && !identity.authenticatedAppUserId && ipUsage && ipUsage.storiesGenerated >= FREE_IP_DAILY_LIMIT) {
-      console.warn("[api/story] free ip fair-use limit reached", {
-        ip: clientIp,
-        feature: "story_generation",
-        dailyStoriesGenerated: ipUsage.storiesGenerated,
-        dailyLimit: FREE_IP_DAILY_LIMIT
-      });
+console.log("CHECK:", {
+  original: authUserId,
+  clean: cleanId,
+  isPremium,
+  premiumList: PREMIUM_USERS
+});
+// usage
+let usage = await getUserStoryUsage(userId);
+let ipUsage = clientIp !== "unknown"
+  ? await getIpStoryUsage(clientIp)
+  : null;
 
-      return NextResponse.json(
-        {
-          error: t.home.errors.dailyLimitReached
-        },
-        { status: 429 }
-      );
-    }
+// ✅ IP лимит (ТОЛЬКО для free)
+if (
+  !isPremium &&
+  ipUsage &&
+  ipUsage.storiesGenerated >= FREE_IP_DAILY_LIMIT
+) {
+  console.warn("[api/story] free ip fair-use limit reached", {
+    ip: clientIp,
+    dailyStoriesGenerated: ipUsage.storiesGenerated,
+    dailyLimit: FREE_IP_DAILY_LIMIT,
+  });
 
-    if (!isPremium && usage.storiesGenerated >= FREE_LIMIT) {
-      console.warn("[api/story] free limit reached", {
-        userId,
-        feature: "story_generation",
-      plan: isPremium ? "premium" : "free",
-        storiesGenerated: usage.storiesGenerated
-      });
+  return NextResponse.json(
+    { error: "Free limit reached (IP)" },
+    { status: 403 }
+  );
+}
 
-      return NextResponse.json(
-        {
-          error: "Free story limit reached",
-          upgradeRequired: true,
-          storiesRemaining: 0
-        },
-        { status: 403 }
-      );
-    }
+// ✅ лимит для free аккаунта
+if (!isPremium && usage.storiesGenerated >= FREE_LIMIT) {
+  console.warn("[api/story] free limit reached", {
+    userId,
+    storiesGenerated: usage.storiesGenerated
+  });
+
+  return NextResponse.json(
+    {
+      error: "Free story limit reached",
+      upgradeRequired: true,
+      storiesRemaining: 0
+    },
+    { status: 403 }
+  );
+}
+
+// ✅ лимит для premium (дневной)
 
     if (isPremium && usage.dailyStoriesGenerated >= PREMIUM_DAILY_LIMIT) {
       console.warn("[api/story] premium daily limit reached", {
