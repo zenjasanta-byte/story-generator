@@ -187,6 +187,8 @@ export default function HomePage() {
   }
 
   async function buyCredits(credits: number, price: number) {
+    console.log("BUY CLICKED", credits, price);
+
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: {
@@ -197,10 +199,11 @@ export default function HomePage() {
 
     const data = await res.json();
 
+    console.log("STRIPE RESPONSE", data);
+
     if (data.url) {
       window.location.href = data.url;
     } else {
-      console.error("Stripe error", data);
       alert("Payment error");
     }
   }
