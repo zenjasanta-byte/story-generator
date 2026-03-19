@@ -258,10 +258,6 @@ export default function HomePage() {
 
   return (
     <main className="relative mx-auto w-full max-w-7xl px-4 pb-14 pt-8 sm:px-6 lg:px-8 lg:pb-20 lg:pt-12">
-      <div style={{background: "red", color: "white", padding: "10px"}}>
-        DEBUG VERSION 123
-      </div>
-
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="hero-orb left-[2%] top-[2%]" />
         <div className="hero-orb hero-orb-alt right-[4%] top-[16%]" />
