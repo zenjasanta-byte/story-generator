@@ -104,6 +104,17 @@ export async function POST(request: Request) {
     }
 
     const identity = await getCurrentUserIdentity();
+
+// 🔍 Лог для проверки (можешь потом удалить)
+console.log("IDENTITY:", {
+  appUserId: identity.appUserId,
+  authenticatedAppUserId: identity.authenticatedAppUserId
+});
+
+// ✅ правильный userId
+const userId = identity.authenticatedAppUserId
+  ? `user:${identity.authenticatedAppUserId}`
+  : `guest:${identity.appUserId}`;
     const userId = identity.authenticatedAppUserId
   ? `user:${identity.authenticatedAppUserId}`
   : `guest:${identity.appUserId}`;
