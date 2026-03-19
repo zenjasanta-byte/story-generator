@@ -97,7 +97,9 @@ export async function POST(request: Request) {
     }
 
     const identity = await getCurrentUserIdentity();
-    const userId = identity.authenticatedAppUserId || identity.appUserId;
+    const userId = identity.authenticatedAppUserId
+  ? `user:${identity.authenticatedAppUserId}`
+  : `guest:${identity.appUserId}`;
 
     if (!userId) {
       return NextResponse.json({ error: "Missing user identifier." }, { status: 400 });
