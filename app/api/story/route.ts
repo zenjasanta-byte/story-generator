@@ -103,29 +103,27 @@ export async function POST(request: Request) {
       }
     }
 
-    const identity = await getCurrentUserIdentity();
+  const identity = await getCurrentUserIdentity();
 
-// 🔍 Лог для проверки (можешь потом удалить)
+// лог оставь временно
 console.log("IDENTITY:", {
   appUserId: identity.appUserId,
   authenticatedAppUserId: identity.authenticatedAppUserId
 });
 
-// ✅ правильный userId
+// userId
 const userId = identity.authenticatedAppUserId
   ? `user:${identity.authenticatedAppUserId}`
   : `guest:${identity.appUserId}`;
-// 🔥 ВРЕМЕННО: делаем тебя премиумом
-const isPremium = identity.authenticatedAppUserId === "vbh4g-1773911110353-9b91a232655f";
+
+// ✅ ПРАВИЛЬНЫЙ premium (только один!)
+const isPremium = identity.authenticatedAppUserId === "9pk5r-1773912436064-858a3f7b55f0";
  
     if (!userId) {
       return NextResponse.json({ error: "Missing user identifier." }, { status: 400 });
     }
 
-    const billing = identity.authenticatedAppUserId ? await getBillingRecord(identity.authenticatedAppUserId) : null;
-    const isPremium = Boolean(
-  identity.authenticatedAppUserId === "9pk5r-1773912436064-858a3f7b55f0"
-);
+ 
       billing && billing.plan === "premium" && shouldKeepPremiumForStatus(billing.subscriptionStatus)
     );
 
