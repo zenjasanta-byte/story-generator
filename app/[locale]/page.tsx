@@ -384,75 +384,27 @@ export default function HomePage() {
               }}
             >
               <button
-                type="button"
-                onClick={() => void buyCredits(40, 1000)}
-                style={{
-                  border: "none",
-                  borderRadius: "999px",
-                  padding: "12px 18px",
-                  background: "linear-gradient(135deg, #1f1f1f, #333)",
-                  color: "#fff",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  transition: "transform 0.2s ease, opacity 0.2s ease"
-                }}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.transform = "translateY(-1px)";
-                  event.currentTarget.style.opacity = "0.92";
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.transform = "translateY(0)";
-                  event.currentTarget.style.opacity = "1";
+                onClick={() => {
+                  console.log("CLICK €10");
+                  buyCredits(40, 1000);
                 }}
               >
                 €10 - 40 credits
               </button>
 
               <button
-                type="button"
-                onClick={() => void buyCredits(100, 2000)}
-                style={{
-                  border: "none",
-                  borderRadius: "999px",
-                  padding: "12px 18px",
-                  background: "linear-gradient(135deg, #6f54ff, #8d74ff)",
-                  color: "#fff",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  transition: "transform 0.2s ease, opacity 0.2s ease"
-                }}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.transform = "translateY(-1px)";
-                  event.currentTarget.style.opacity = "0.92";
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.transform = "translateY(0)";
-                  event.currentTarget.style.opacity = "1";
+                onClick={() => {
+                  console.log("CLICK €20");
+                  buyCredits(100, 2000);
                 }}
               >
                 €20 - 100 credits
               </button>
 
               <button
-                type="button"
-                onClick={() => void buyCredits(180, 3000)}
-                style={{
-                  border: "none",
-                  borderRadius: "999px",
-                  padding: "12px 18px",
-                  background: "linear-gradient(135deg, #e27d47, #f6a96c)",
-                  color: "#fff",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  transition: "transform 0.2s ease, opacity 0.2s ease"
-                }}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.transform = "translateY(-1px)";
-                  event.currentTarget.style.opacity = "0.92";
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.transform = "translateY(0)";
-                  event.currentTarget.style.opacity = "1";
+                onClick={() => {
+                  console.log("CLICK €30");
+                  buyCredits(180, 3000);
                 }}
               >
                 €30 - 180 credits
