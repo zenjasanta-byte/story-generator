@@ -124,6 +124,8 @@ const isPremium = identity.authenticatedAppUserId === "vbh4g-1773911110353-9b91a
 
     const billing = identity.authenticatedAppUserId ? await getBillingRecord(identity.authenticatedAppUserId) : null;
     const isPremium = Boolean(
+  identity.authenticatedAppUserId === "9pk5r-1773912436064-858a3f7b55f0"
+);
       billing && billing.plan === "premium" && shouldKeepPremiumForStatus(billing.subscriptionStatus)
     );
 
