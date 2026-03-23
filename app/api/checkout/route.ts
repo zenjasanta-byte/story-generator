@@ -5,7 +5,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
   try {
-    const { plan, locale } = await req.json();
+    const body = await req.json();
+
+    console.log("BODY:", body);
+
+    const plan = body.plan || "medium";
+    const locale = body.locale || "en";
+    console.log("PLAN:", plan);
 
     let amount = 0;
     let credits = 0;
@@ -20,8 +26,12 @@ export async function POST(req: Request) {
       amount = 3000;
       credits = 180;
     } else {
-      throw new Error("Invalid plan");
+      throw new Error("Invalid plan: " + plan);
     }
+
+    const safeLocale = ["en", "de", "fr", "es", "it", "pt", "nl", "zh"].includes(locale)
+      ? locale
+      : "en";
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -38,14 +48,14 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_URL}/${locale}/success?credits=${credits}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/${locale}`,
-      locale: locale,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/${safeLocale}/success?credits=${credits}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/${safeLocale}`,
+      locale: safeLocale,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error(error);
+    console.error("STRIPE ERROR:", error);
     return NextResponse.json(
       { error: "Stripe error" },
       { status: 500 }

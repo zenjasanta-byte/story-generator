@@ -33,9 +33,39 @@ export default function PremiumPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleCheckout(plan: "small" | "medium" | "large") {
+ async function handleCheckout(plan: "small" | "medium" | "large") {
     if (loading) return;
 
+    console.log("CLICK PLAN:", plan);
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          plan,
+          locale: currentLocale,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Stripe error");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Stripe error");
+    } finally {
+      setLoading(false);
+    }
+}
     try {
       setLoading(true);
       setError(null);
