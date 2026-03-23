@@ -7,10 +7,6 @@ export async function POST(req: Request) {
   try {
     const { amount } = await req.json();
 
-    if (!amount) {
-      return NextResponse.json({ error: "No amount" }, { status: 400 });
-    }
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
@@ -26,13 +22,13 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: "https://story-generator-pi-hazel.vercel.app/success",
-      cancel_url: "https://story-generator-pi-hazel.vercel.app/",
+      success_url: "https://your-site.com/success",
+      cancel_url: "https://your-site.com/cancel",
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error("STRIPE ERROR:", error);
+    console.error(error);
     return NextResponse.json(
       { error: "Stripe error" },
       { status: 500 }
