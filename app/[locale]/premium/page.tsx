@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { getLegalTranslations, SUPPORT_EMAIL_PLACEHOLDER } from "@/lib/legalContent";
-import { normalizeLanguageCode, type SupportedLanguage } from "@/lib/narrationVoices";
-import { SITE_NAME } from "@/lib/siteConfig";
+import { normalizeLanguageCode } from "@/lib/narrationVoices";
 
 export default function PremiumPage() {
   const params = useParams<{ locale: string }>();
@@ -16,14 +15,12 @@ export default function PremiumPage() {
     [currentLocale]
   );
 
-  const t = useMemo(() => {
-    return {
-      title: "Premium",
-      subtitle: "Choose your credits",
-      back: "Back",
-      error: "Payment failed",
-    };
-  }, []);
+  const t = {
+    title: "Premium",
+    subtitle: "Choose your credits",
+    back: "Back",
+    error: "Payment failed",
+  };
 
   const legalFooter = useMemo(
     () => getLegalTranslations(currentLanguageCode).footer,
@@ -33,39 +30,11 @@ export default function PremiumPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
- async function handleCheckout(plan: "small" | "medium" | "large") {
+  async function handleCheckout(plan: "small" | "medium" | "large") {
     if (loading) return;
 
     console.log("CLICK PLAN:", plan);
 
-    try {
-      setLoading(true);
-
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          plan,
-          locale: currentLocale,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Stripe error");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Stripe error");
-    } finally {
-      setLoading(false);
-    }
-}
     try {
       setLoading(true);
       setError(null);
@@ -86,16 +55,17 @@ export default function PremiumPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error("No URL");
+        throw new Error("Stripe error");
       }
     } catch (err) {
+      console.error(err);
       setError(t.error);
     } finally {
       setLoading(false);
     }
   }
 
-  const homeHref = useMemo(() => `/${currentLocale}`, [currentLocale]);
+  const homeHref = `/${currentLocale}`;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6">
@@ -104,39 +74,25 @@ export default function PremiumPage() {
         <p className="text-gray-500 mb-6">{t.subtitle}</p>
 
         <div className="grid gap-4">
-          <button
-            onClick={() => handleCheckout("small")}
-            className="rounded-xl border p-4 hover:bg-gray-50 transition"
-          >
+          <button onClick={() => handleCheckout("small")} className="rounded-xl border p-4">
             <div className="text-lg font-bold">€10</div>
             <div className="text-sm text-gray-500">40 credits</div>
           </button>
 
-          <button
-            onClick={() => handleCheckout("medium")}
-            className="rounded-xl border p-4 hover:bg-gray-50 transition"
-          >
+          <button onClick={() => handleCheckout("medium")} className="rounded-xl border p-4">
             <div className="text-lg font-bold">€20</div>
             <div className="text-sm text-gray-500">100 credits</div>
           </button>
 
-          <button
-            onClick={() => handleCheckout("large")}
-            className="rounded-xl border p-4 hover:bg-gray-50 transition"
-          >
+          <button onClick={() => handleCheckout("large")} className="rounded-xl border p-4">
             <div className="text-lg font-bold">€30</div>
             <div className="text-sm text-gray-500">180 credits</div>
           </button>
         </div>
 
-        {error && (
-          <p className="mt-4 text-red-500 text-sm">{error}</p>
-        )}
+        {error && <p className="mt-4 text-red-500 text-sm">{error}</p>}
 
-        <Link
-          href={homeHref}
-          className="block mt-6 text-sm text-gray-500 hover:underline"
-        >
+        <Link href={homeHref} className="block mt-6 text-sm text-gray-500">
           {t.back}
         </Link>
 
@@ -145,9 +101,6 @@ export default function PremiumPage() {
           <p>{SUPPORT_EMAIL_PLACEHOLDER}</p>
         </div>
       </div>
-    return (
-  <main>
-    {/* твой JSX */}
-  </main>
-);
+    </main>
+  );
 }
