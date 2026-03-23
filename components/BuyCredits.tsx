@@ -1,35 +1,26 @@
-console.log("🔥 NEW VERSION LOADED");
 "use client";
+
+console.log("🔥 NEW VERSION LOADED");
 
 export default function BuyCredits() {
   const handleCheckout = async (amount: number) => {
-    try {
-      console.log("CALLING API", amount);
+    console.log("CALLING API", amount);
 
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ amount }),
-      });
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ amount }),
+    });
 
-      if (!res.ok) {
-        throw new Error("Request failed");
-      }
+    const data = await res.json();
+    console.log("RESPONSE", data);
 
-      const data = await res.json();
-      console.log("RESPONSE", data);
-
-      if (data.url) {
-        // 🔥 РЕДИРЕКТ НА STRIPE
-        window.location.href = data.url;
-      } else {
-        alert("Stripe error: no URL");
-      }
-    } catch (error) {
-      console.error("CHECKOUT ERROR:", error);
-      alert("Ошибка при оплате");
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Stripe error");
     }
   };
 
@@ -51,25 +42,24 @@ export default function BuyCredits() {
 
       <style jsx>{`
         .credit-button {
-          background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+          background-color: #f1c40f;
           color: white;
           border: none;
-          padding: 12px 20px;
-          border-radius: 12px;
+          padding: 10px 20px;
+          border-radius: 8px;
           font-size: 16px;
-          font-weight: 600;
           cursor: pointer;
-          transition: all 0.25s ease;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          transition: transform 0.2s, background-color 0.3s;
         }
 
         .credit-button:hover {
-          transform: translateY(-2px) scale(1.05);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+          background-color: #e1b30f;
+          transform: scale(1.05);
         }
 
-        .credit-button:active {
-          transform: scale(0.98);
+        .credit-button:focus {
+          outline: none;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
         }
       `}</style>
     </>
