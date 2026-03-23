@@ -4,7 +4,7 @@ export default function BuyCredits() {
   const buyCredits = async (amount: number, price: number) => {
     console.log("BUY", amount, price);
 
-    const response = await fetch("/api/stripe/checkout", {
+    const response = await fetch("/api/checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
