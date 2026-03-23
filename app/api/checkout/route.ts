@@ -22,8 +22,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-     success_url: "https://story-generator-pi-hazel.vercel.app/success",
-cancel_url: "https://story-generator-pi-hazel.vercel.app/",
+     success_url: "https://story-generator-pi-hazel.vercel.app/en/success",
+cancel_url: "https://story-generator-pi-hazel.vercel.app/en",
     });
 
     return NextResponse.json({ url: session.url });
