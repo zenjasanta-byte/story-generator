@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!,
 
 export async function POST(req: Request) {
   try {
@@ -29,7 +27,7 @@ export async function POST(req: Request) {
         },
       ],
       success_url: "https://story-generator-pi-hazel.vercel.app/success",
-cancel_url: "https://story-generator-pi-hazel.vercel.app/",
+      cancel_url: "https://story-generator-pi-hazel.vercel.app/",
     });
 
     return NextResponse.json({ url: session.url });
