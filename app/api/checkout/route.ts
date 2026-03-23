@@ -5,10 +5,23 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
   try {
-    const { amount } = await req.json();
+    const { plan, locale } = await req.json();
 
-    // 👉 считаем кредиты (пример: 1€ = 10 credits)
-    const credits = amount / 100 * 10;
+    let amount = 0;
+    let credits = 0;
+
+    if (plan === "small") {
+      amount = 1000;
+      credits = 40;
+    } else if (plan === "medium") {
+      amount = 2000;
+      credits = 100;
+    } else if (plan === "large") {
+      amount = 3000;
+      credits = 180;
+    } else {
+      throw new Error("Invalid plan");
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -25,10 +38,9 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-
-      // 🔥 ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ
-      success_url: `https://story-generator-pi-hazel.vercel.app/en/success?credits=${credits}`,
-      cancel_url: "https://story-generator-pi-hazel.vercel.app/en",
+      success_url: `${process.env.NEXT_PUBLIC_URL}/${locale}/success?credits=${credits}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/${locale}`,
+      locale: locale,
     });
 
     return NextResponse.json({ url: session.url });
