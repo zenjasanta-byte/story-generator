@@ -8,9 +8,9 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeSecretKey ? new Stripe(process.env.STRIPE_SECRET_KEY as string) : null;
 
 const CREDIT_PACKAGES = {
-  40: 1000,
-  100: 2000,
-  180: 3000
+  1000: 40,
+  2000: 100,
+  3000: 180
 } as const;
 
 function resolveBaseUrl(request: Request) {
@@ -28,12 +28,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "You must be logged in" }, { status: 401 });
   }
 
-  const { credits, price } = (await req.json()) as { credits?: number; price?: number };
-  const normalizedCredits = Number(credits);
-  const normalizedPrice = Number(price);
-  const expectedPrice = CREDIT_PACKAGES[normalizedCredits as keyof typeof CREDIT_PACKAGES];
+  const { amount } = (await req.json()) as { amount?: number };
+  const normalizedAmount = Number(amount);
+  const credits = CREDIT_PACKAGES[normalizedAmount as keyof typeof CREDIT_PACKAGES];
 
-  if (!expectedPrice || expectedPrice !== normalizedPrice) {
+  if (!credits) {
     return NextResponse.json({ error: "Invalid credit package" }, { status: 400 });
   }
 
@@ -47,16 +46,16 @@ export async function POST(req: Request) {
         price_data: {
           currency: "eur",
           product_data: {
-            name: `${normalizedCredits} Credits`
+            name: `${credits} Credits`
           },
-          unit_amount: normalizedPrice
+          unit_amount: normalizedAmount
         },
         quantity: 1
       }
     ],
     metadata: {
       userId: `user:${identity.authenticatedAppUserId}`,
-      credits: String(normalizedCredits)
+      credits: String(credits)
     },
     success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/`

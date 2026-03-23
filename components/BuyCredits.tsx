@@ -1,38 +1,39 @@
 "use client";
 
 export default function BuyCredits() {
-  const handleCheckout = async (amount: number, price: number) => {
-    console.log("BUY", amount, price);
-    console.log("CALLING API");
+  const handleCheckout = async (amount: number) => {
+    console.log("CALLING API", amount);
 
-    const response = await fetch("/api/checkout", {
+    const res = await fetch("/api/checkout", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ credits: amount, price })
+      body: JSON.stringify({ amount }),
     });
 
-    const data = await response.json();
-    console.log("RESPONSE:", data);
+    const data = await res.json();
+    console.log("RESPONSE", data);
 
-    if (data?.url) {
+    if (data.url) {
       window.location.href = data.url;
+    } else {
+      alert("Stripe error");
     }
   };
 
   return (
     <>
       <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-        <button className="credit-button" onClick={() => handleCheckout(40, 1000)}>
+        <button className="credit-button" onClick={() => handleCheckout(1000)}>
           {"\u20AC10 - 40 credits"}
         </button>
 
-        <button className="credit-button" onClick={() => handleCheckout(100, 2000)}>
+        <button className="credit-button" onClick={() => handleCheckout(2000)}>
           {"\u20AC20 - 100 credits"}
         </button>
 
-        <button className="credit-button" onClick={() => handleCheckout(180, 3000)}>
+        <button className="credit-button" onClick={() => handleCheckout(3000)}>
           {"\u20AC30 - 180 credits"}
         </button>
       </div>
