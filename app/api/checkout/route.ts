@@ -7,6 +7,9 @@ export async function POST(req: Request) {
   try {
     const { amount } = await req.json();
 
+    // 👉 считаем кредиты (пример: 1€ = 10 credits)
+    const credits = amount / 100 * 10;
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
@@ -15,15 +18,17 @@ export async function POST(req: Request) {
           price_data: {
             currency: "eur",
             product_data: {
-              name: "Credits",
+              name: `${credits} Credits`,
             },
             unit_amount: amount,
           },
           quantity: 1,
         },
       ],
-     success_url: "https://story-generator-pi-hazel.vercel.app/en/success",
-cancel_url: "https://story-generator-pi-hazel.vercel.app/en",
+
+      // 🔥 ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ
+      success_url: `https://story-generator-pi-hazel.vercel.app/en/success?credits=${credits}`,
+      cancel_url: "https://story-generator-pi-hazel.vercel.app/en",
     });
 
     return NextResponse.json({ url: session.url });
