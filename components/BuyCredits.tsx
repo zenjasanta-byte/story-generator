@@ -2,23 +2,33 @@
 
 export default function BuyCredits() {
   const handleCheckout = async (amount: number) => {
-    console.log("CALLING API", amount);
+    try {
+      console.log("CALLING API", amount);
 
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount }),
-    });
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount }),
+      });
 
-    const data = await res.json();
-    console.log("RESPONSE", data);
+      if (!res.ok) {
+        throw new Error("Request failed");
+      }
 
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Stripe error");
+      const data = await res.json();
+      console.log("RESPONSE", data);
+
+      if (data.url) {
+        // 🔥 РЕДИРЕКТ НА STRIPE
+        window.location.href = data.url;
+      } else {
+        alert("Stripe error: no URL");
+      }
+    } catch (error) {
+      console.error("CHECKOUT ERROR:", error);
+      alert("Ошибка при оплате");
     }
   };
 
@@ -26,38 +36,39 @@ export default function BuyCredits() {
     <>
       <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
         <button className="credit-button" onClick={() => handleCheckout(1000)}>
-          {"\u20AC10 - 40 credits"}
+          €10 - 40 credits
         </button>
 
         <button className="credit-button" onClick={() => handleCheckout(2000)}>
-          {"\u20AC20 - 100 credits"}
+          €20 - 100 credits
         </button>
 
         <button className="credit-button" onClick={() => handleCheckout(3000)}>
-          {"\u20AC30 - 180 credits"}
+          €30 - 180 credits
         </button>
       </div>
 
       <style jsx>{`
         .credit-button {
-          background-color: #f1c40f;
+          background: linear-gradient(135deg, #ff9a9e, #fad0c4);
           color: white;
           border: none;
-          padding: 10px 20px;
-          border-radius: 8px;
+          padding: 12px 20px;
+          border-radius: 12px;
           font-size: 16px;
+          font-weight: 600;
           cursor: pointer;
-          transition: transform 0.2s, background-color 0.3s;
+          transition: all 0.25s ease;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .credit-button:hover {
-          background-color: #e1b30f;
-          transform: scale(1.05);
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
         }
 
-        .credit-button:focus {
-          outline: none;
-          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        .credit-button:active {
+          transform: scale(0.98);
         }
       `}</style>
     </>
