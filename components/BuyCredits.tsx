@@ -1,3 +1,4 @@
+console.log("🔥 NEW VERSION LOADED");
 "use client";
 
 export default function BuyCredits() {
