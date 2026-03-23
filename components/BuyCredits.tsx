@@ -1,8 +1,9 @@
 "use client";
 
 export default function BuyCredits() {
-  const buyCredits = async (amount: number, price: number) => {
+  const handleCheckout = async (amount: number, price: number) => {
     console.log("BUY", amount, price);
+    console.log("CALLING API");
 
     const response = await fetch("/api/checkout", {
       method: "POST",
@@ -13,6 +14,7 @@ export default function BuyCredits() {
     });
 
     const data = await response.json();
+    console.log("RESPONSE:", data);
 
     if (data?.url) {
       window.location.href = data.url;
@@ -22,15 +24,15 @@ export default function BuyCredits() {
   return (
     <>
       <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-        <button className="credit-button" onClick={() => buyCredits(40, 1000)}>
+        <button className="credit-button" onClick={() => handleCheckout(40, 1000)}>
           {"\u20AC10 - 40 credits"}
         </button>
 
-        <button className="credit-button" onClick={() => buyCredits(100, 2000)}>
+        <button className="credit-button" onClick={() => handleCheckout(100, 2000)}>
           {"\u20AC20 - 100 credits"}
         </button>
 
-        <button className="credit-button" onClick={() => buyCredits(180, 3000)}>
+        <button className="credit-button" onClick={() => handleCheckout(180, 3000)}>
           {"\u20AC30 - 180 credits"}
         </button>
       </div>
