@@ -1,8 +1,22 @@
 "use client";
 
 export default function BuyCredits() {
-  const buyCredits = (amount: number, price: number) => {
+  const buyCredits = async (amount: number, price: number) => {
     console.log("BUY", amount, price);
+
+    const response = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ credits: amount, price })
+    });
+
+    const data = await response.json();
+
+    if (data?.url) {
+      window.location.href = data.url;
+    }
   };
 
   return (

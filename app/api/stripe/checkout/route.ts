@@ -5,7 +5,7 @@ import { getCurrentUserIdentity } from "@/lib/currentUser.server";
 export const runtime = "nodejs";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
+const stripe = stripeSecretKey ? new Stripe(process.env.STRIPE_SECRET_KEY as string) : null;
 
 const CREDIT_PACKAGES = {
   40: 1000,
