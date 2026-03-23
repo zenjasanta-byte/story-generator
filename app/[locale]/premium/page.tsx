@@ -145,6 +145,9 @@ export default function PremiumPage() {
           <p>{SUPPORT_EMAIL_PLACEHOLDER}</p>
         </div>
       </div>
-    </main>
-  );
+    return (
+  <main>
+    {/* твой JSX */}
+  </main>
+);
 }
