@@ -1,65 +1,36 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { getCurrentUserIdentity } from "@/lib/currentUser.server";
 
-export const runtime = "nodejs";
-
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeSecretKey ? new Stripe(process.env.STRIPE_SECRET_KEY as string) : null;
-
-const CREDIT_PACKAGES = {
-  1000: 40,
-  2000: 100,
-  3000: 180
-} as const;
-
-function resolveBaseUrl(request: Request) {
-  return process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
-  if (!stripe) {
-    return NextResponse.json({ error: "Stripe is not configured" }, { status: 500 });
-  }
+  try {
+    const { amount } = await req.json();
 
-  const identity = await getCurrentUserIdentity();
+    console.log("AMOUNT:", amount);
 
-  if (!identity.authenticatedAppUserId) {
-    return NextResponse.json({ error: "You must be logged in" }, { status: 401 });
-  }
-
-  const { amount } = (await req.json()) as { amount?: number };
-  const normalizedAmount = Number(amount);
-  const credits = CREDIT_PACKAGES[normalizedAmount as keyof typeof CREDIT_PACKAGES];
-
-  if (!credits) {
-    return NextResponse.json({ error: "Invalid credit package" }, { status: 400 });
-  }
-
-  const baseUrl = resolveBaseUrl(req);
-
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    mode: "payment",
-    line_items: [
-      {
-        price_data: {
-          currency: "eur",
-          product_data: {
-            name: `${credits} Credits`
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: [
+        {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: "Credits",
+            },
+            unit_amount: amount,
           },
-          unit_amount: normalizedAmount
+          quantity: 1,
         },
-        quantity: 1
-      }
-    ],
-    metadata: {
-      userId: `user:${identity.authenticatedAppUserId}`,
-      credits: String(credits)
-    },
-    success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}/`
-  });
+      ],
+      success_url: "https://your-site.vercel.app/success",
+      cancel_url: "https://your-site.vercel.app/cancel",
+    });
 
-  return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url });
+  } catch (error) {
+    console.error("STRIPE ERROR:", error);
+    return NextResponse.json({ error: "Stripe failed" });
+  }
 }
