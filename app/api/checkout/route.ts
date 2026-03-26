@@ -3,29 +3,19 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-const DOMAIN = "https://story-generator-pi-hazel.vercel.app";
-
 export async function POST(req: Request) {
   try {
-    const { plan, locale } = await req.json();
+    const { amount } = await req.json();
 
-    let amount = 0;
     let credits = 0;
 
-    if (plan === "small") {
-      amount = 1000;
-      credits = 40;
-    } else if (plan === "medium") {
-      amount = 2000;
-      credits = 100;
-    } else if (plan === "large") {
-      amount = 3000;
-      credits = 180;
-    } else {
-      throw new Error("Invalid plan");
-    }
+    if (amount === 1000) credits = 40;
+    if (amount === 2000) credits = 100;
+    if (amount === 3000) credits = 180;
 
-    const safeLocale = locale || "en";
+    if (!credits) {
+      return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -42,16 +32,14 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${DOMAIN}/${safeLocale}/success?credits=${credits}`,
-      cancel_url: `${DOMAIN}/${safeLocale}`,
+
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/en/success?credits=${credits}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/en`,
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (error: any) {
-    console.error("STRIPE ERROR:", error.message);
-    return NextResponse.json(
-      { error: "Stripe error" },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("STRIPE ERROR:", error);
+    return NextResponse.json({ error: "Stripe error" }, { status: 500 });
   }
 }

@@ -1,67 +1,51 @@
 "use client";
 
-console.log("🔥 NEW VERSION LOADED");
+import { useState } from "react";
 
 export default function BuyCredits() {
-  const handleCheckout = async (amount: number) => {
-    console.log("CALLING API", amount);
+  const [loading, setLoading] = useState(false);
 
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount }),
-    });
+  async function handleCheckout(amount: number) {
+    if (loading) return;
 
-    const data = await res.json();
-    console.log("RESPONSE", data);
+    setLoading(true);
 
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Stripe error");
+      }
+    } catch (err) {
       alert("Stripe error");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <>
-      <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-        <button className="credit-button" onClick={() => handleCheckout(1000)}>
-          €10 - 40 credits
-        </button>
+    <div style={{ display: "flex", gap: "10px" }}>
+      <button onClick={() => handleCheckout(1000)}>
+        €10 - 40 credits
+      </button>
 
-        <button className="credit-button" onClick={() => handleCheckout(2000)}>
-          €20 - 100 credits
-        </button>
+      <button onClick={() => handleCheckout(2000)}>
+        €20 - 100 credits
+      </button>
 
-        <button className="credit-button" onClick={() => handleCheckout(3000)}>
-          €30 - 180 credits
-        </button>
-      </div>
-
-      <style jsx>{`
-        .credit-button {
-          background-color: #f1c40f;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 8px;
-          font-size: 16px;
-          cursor: pointer;
-          transition: transform 0.2s, background-color 0.3s;
-        }
-
-        .credit-button:hover {
-          background-color: #e1b30f;
-          transform: scale(1.05);
-        }
-
-        .credit-button:focus {
-          outline: none;
-          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
-      `}</style>
-    </>
+      <button onClick={() => handleCheckout(3000)}>
+        €30 - 180 credits
+      </button>
+    </div>
   );
 }
