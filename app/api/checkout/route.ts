@@ -3,11 +3,11 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
+const DOMAIN = "https://story-generator-pi-hazel.vercel.app";
+
 export async function POST(req: Request) {
   try {
     const { plan, locale } = await req.json();
-
-    console.log("PLAN:", plan);
 
     let amount = 0;
     let credits = 0;
@@ -42,8 +42,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: `https://story-generator-26hdkfojo-zenjasanta-bytes-projects.vercel.app/${safeLocale}/success?credits=${credits}`,
-      cancel_url: `https://story-generator-26hdkfojo-zenjasanta-bytes-projects.vercel.app/${safeLocale}`,
+      success_url: `${DOMAIN}/${safeLocale}/success?credits=${credits}`,
+      cancel_url: `${DOMAIN}/${safeLocale}`,
     });
 
     return NextResponse.json({ url: session.url });
