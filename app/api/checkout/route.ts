@@ -48,9 +48,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_URL}/${safeLocale}/success?credits=${credits}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/${safeLocale}`,
-      locale: safeLocale,
+      success_url: `https://story-generator-26hdkfojo-zenjasanta-bytes-projects.vercel.app/${safeLocale}/success?credits=${credits}`,
+cancel_url: `https://story-generator-26hdkfojo-zenjasanta-bytes-projects.vercel.app/${safeLocale}`,
     });
 
     return NextResponse.json({ url: session.url });
