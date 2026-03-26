@@ -5,12 +5,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const { plan, locale } = await req.json();
 
-    console.log("BODY:", body);
-
-    const plan = body.plan || "medium";
-    const locale = body.locale || "en";
     console.log("PLAN:", plan);
 
     let amount = 0;
@@ -26,12 +22,10 @@ export async function POST(req: Request) {
       amount = 3000;
       credits = 180;
     } else {
-      throw new Error("Invalid plan: " + plan);
+      throw new Error("Invalid plan");
     }
 
-    const safeLocale = ["en", "de", "fr", "es", "it", "pt", "nl", "zh"].includes(locale)
-      ? locale
-      : "en";
+    const safeLocale = locale || "en";
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -49,12 +43,12 @@ export async function POST(req: Request) {
         },
       ],
       success_url: `https://story-generator-26hdkfojo-zenjasanta-bytes-projects.vercel.app/${safeLocale}/success?credits=${credits}`,
-cancel_url: `https://story-generator-26hdkfojo-zenjasanta-bytes-projects.vercel.app/${safeLocale}`,
+      cancel_url: `https://story-generator-26hdkfojo-zenjasanta-bytes-projects.vercel.app/${safeLocale}`,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
-  console.error("STRIPE FULL ERROR:", error.message, error);
+    console.error("STRIPE ERROR:", error.message);
     return NextResponse.json(
       { error: "Stripe error" },
       { status: 500 }
