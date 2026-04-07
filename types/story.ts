@@ -38,6 +38,13 @@ export type StoryResponse = {
   illustrations: StoryIllustration[];
   narrationAudioUrl?: string | null;
   narrationAudioMimeType?: string | null;
+  costEstimate?: {
+    textUsd: number;
+    imageUsd: number;
+    audioUsd: number;
+    totalUsd: number;
+    notes: string[];
+  };
 };
 
 export type SavedStoryOutput = {

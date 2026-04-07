@@ -70,7 +70,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       audioUrl: audio.audioDataUrl,
-      mimeType: audio.mimeType
+      mimeType: audio.mimeType,
+      costEstimate: audio.costEstimate
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unexpected server error";

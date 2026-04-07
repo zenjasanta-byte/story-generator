@@ -14,11 +14,14 @@ import type { StoryFormInput, StoryIllustration, StoryPage, StoryResponse, Voice
 const OPENAI_API_URL = "https://api.openai.com/v1/responses";
 const OPENAI_IMAGE_API_URL = "https://api.openai.com/v1/images/generations";
 const OPENAI_SPEECH_API_URL = "https://api.openai.com/v1/audio/speech";
-const OPENAI_MODEL = "gpt-4.1-mini";
-const OPENAI_IMAGE_MODEL = "gpt-image-1";
+const OPENAI_MODEL = "gpt-5-nano";
+const OPENAI_IMAGE_MODEL = "dall-e-2";
 const OPENAI_SPEECH_MODEL = "gpt-4o-mini-tts";
 const OPENAI_TIMEOUT_MS = 120000;
-const OPENAI_STORY_MAX_OUTPUT_TOKENS = 1400;
+const OPENAI_STORY_MAX_OUTPUT_TOKENS = 520;
+const TEXT_COST_USD_ESTIMATE = 0.0002;
+const IMAGE_COST_USD_ESTIMATE = 0.018;
+const AUDIO_COST_USD_ESTIMATE_20_SECONDS = 0.005;
 
 export class OpenAIRequestError extends Error {
   status: number;
@@ -98,7 +101,8 @@ async function generateSingleIllustration(prompt: string, apiKey: string): Promi
     body: JSON.stringify({
       model: OPENAI_IMAGE_MODEL,
       prompt,
-      size: "1024x1024"
+      n: 1,
+      size: "512x512"
     })
   });
 
@@ -179,12 +183,8 @@ function buildNarrationInstructions(language: string, mode: "full" | "page", voi
   const styleInstruction = buildNarrationStyleInstruction(voiceStyle);
   const base =
     `Speak entirely in ${language}. ` +
-    `Use a natural, accent-neutral, native-sounding delivery for this language whenever possible. ` +
-    `Use a soft, warm, calm, bedtime-storytelling tone. ` +
-    `${styleInstruction} ` +
-    `Use natural pauses and smooth pacing. ` +
-    `Do not announce labels or metadata. ` +
-    `Do not add commentary before the story.`;
+    `Use a simple warm children's-story voice. ${styleInstruction} ` +
+    `Keep it short, natural, and under 20 seconds. No labels or extra commentary.`;
 
   if (mode === "page") {
     return (
@@ -195,8 +195,32 @@ function buildNarrationInstructions(language: string, mode: "full" | "page", voi
 
   return (
     base +
-    ` Read the full story like a gentle bedtime audiobook for a child, keeping the voice steady and comforting from beginning to end.`
+    ` Read only the main story, briskly and warmly.`
   );
+}
+
+function clampNarrationScript(script: string, maxWords = 45) {
+  const words = script.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  return words.slice(0, maxWords).join(" ");
+}
+
+function buildStoryCostEstimate(includeImages: boolean) {
+  const textUsd = TEXT_COST_USD_ESTIMATE;
+  const imageUsd = includeImages ? IMAGE_COST_USD_ESTIMATE : 0;
+  const audioUsd = 0;
+  const totalUsd = Number((textUsd + imageUsd + audioUsd).toFixed(4));
+
+  return {
+    textUsd,
+    imageUsd,
+    audioUsd,
+    totalUsd,
+    notes: [
+      `Text: ${OPENAI_MODEL}, capped at ${OPENAI_STORY_MAX_OUTPUT_TOKENS} output tokens.`,
+      includeImages ? `Image: ${OPENAI_IMAGE_MODEL}, 1 image, 512x512.` : "Image: skipped.",
+      "Audio: skipped in story generation; generated on demand only."
+    ]
+  };
 }
 
 export async function generateNarrationFromScript(params: {
@@ -205,7 +229,7 @@ export async function generateNarrationFromScript(params: {
   logLabel: "narration" | "page-narration";
   voiceStyle?: VoiceStyle;
   isPremium?: boolean;
-}): Promise<{ audioDataUrl: string; mimeType: string }> {
+}): Promise<{ audioDataUrl: string; mimeType: string; costEstimate: { audioUsd: number; notes: string[] } }> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not configured on the server");
@@ -223,6 +247,8 @@ export async function generateNarrationFromScript(params: {
     voice
   });
 
+  const shortScript = clampNarrationScript(params.script);
+
   let response = await fetchWithTimeout(OPENAI_SPEECH_API_URL, {
     method: "POST",
     headers: {
@@ -233,7 +259,7 @@ export async function generateNarrationFromScript(params: {
       model: OPENAI_SPEECH_MODEL,
       voice,
       response_format: "mp3",
-      input: params.script,
+      input: shortScript,
       instructions
     })
   });
@@ -257,7 +283,7 @@ export async function generateNarrationFromScript(params: {
         model: OPENAI_SPEECH_MODEL,
         voice: fallbackVoice,
         response_format: "mp3",
-        input: params.script,
+        input: shortScript,
         instructions
       })
     });
@@ -280,14 +306,19 @@ export async function generateNarrationFromScript(params: {
 
   console.log(`[${params.logLabel}] audio bytes generated`, {
     bytes: audioBytes.byteLength,
-    mimeType
+    mimeType,
+    estimatedCostUsd: AUDIO_COST_USD_ESTIMATE_20_SECONDS
   });
 
   const base64Audio = Buffer.from(audioBytes).toString("base64");
 
   return {
     audioDataUrl: `data:${mimeType};base64,${base64Audio}`,
-    mimeType
+    mimeType,
+    costEstimate: {
+      audioUsd: AUDIO_COST_USD_ESTIMATE_20_SECONDS,
+      notes: [`Audio: ${OPENAI_SPEECH_MODEL}, script capped at 45 words for about 10-20 seconds.`]
+    }
   };
 }
 
@@ -299,7 +330,7 @@ export async function generateStoryNarrationAudio(input: {
   childName?: string;
   voiceStyle?: VoiceStyle;
   isPremium?: boolean;
-}): Promise<{ audioDataUrl: string; mimeType: string }> {
+}): Promise<{ audioDataUrl: string; mimeType: string; costEstimate: { audioUsd: number; notes: string[] } }> {
   const narrationScript = buildNarrationScript(input);
   return generateNarrationFromScript({
     script: narrationScript,
@@ -317,7 +348,7 @@ export async function generatePageNarrationAudio(input: {
   childName?: string;
   voiceStyle?: VoiceStyle;
   isPremium?: boolean;
-}): Promise<{ audioDataUrl: string; mimeType: string }> {
+}): Promise<{ audioDataUrl: string; mimeType: string; costEstimate: { audioUsd: number; notes: string[] } }> {
   const pageScript = buildPageNarrationScript(input);
   return generateNarrationFromScript({
     script: pageScript,
@@ -392,6 +423,13 @@ export async function generateStoryWithOpenAI(
   }
 
   const payload = await response.json();
+  const usage = payload?.usage;
+  console.log("[openai-story] text cost estimate", {
+    model: OPENAI_MODEL,
+    maxOutputTokens: OPENAI_STORY_MAX_OUTPUT_TOKENS,
+    usage,
+    estimatedCostUsd: TEXT_COST_USD_ESTIMATE
+  });
   const text = extractTextPayload(payload);
 
   let parsed: unknown;
@@ -420,22 +458,22 @@ export async function generateStoryWithOpenAI(
       coverImageAlt: coverAlt,
       illustrations: [],
       narrationAudioUrl: null,
-      narrationAudioMimeType: null
+      narrationAudioMimeType: null,
+      costEstimate: buildStoryCostEstimate(false)
     };
   }
 
-  const [cover, illustrations] = await Promise.all([
-    generateCoverIllustration(input, { title: storyCore.title, pages: sortedPages }, apiKey),
-    generateIllustrations(input, { title: storyCore.title, pages: sortedPages }, apiKey)
-  ]);
+  const cover = await generateCoverIllustration(input, { title: storyCore.title, pages: sortedPages }, apiKey);
+  const illustrations: StoryIllustration[] = [];
 
   console.log("[openai-story] full generation completed", {
     language: input.language,
     title: storyCore.title,
     pages: sortedPages.length,
-    generatedAssets: ["story_text", "cover_image", "page_illustrations"],
+    generatedAssets: ["story_text", "single_image"],
     illustrationCount: illustrations.length,
-    successfulIllustrations: illustrations.filter((item) => Boolean(item.url)).length
+    successfulIllustrations: illustrations.filter((item) => Boolean(item.url)).length,
+    estimatedCost: buildStoryCostEstimate(true)
   });
 
   return {
@@ -445,7 +483,8 @@ export async function generateStoryWithOpenAI(
     coverImageAlt: cover.coverImageAlt,
     illustrations,
     narrationAudioUrl: null,
-    narrationAudioMimeType: null
+    narrationAudioMimeType: null,
+    costEstimate: buildStoryCostEstimate(true)
   };
 }
 
